@@ -70,8 +70,8 @@ public class Task {
         } else if (o == null || getClass() != o.getClass()) {
             return false;
         }
-            Task task = (Task) o;
-            return id == task.id && Objects.equals(name, task.name) && Objects.equals(description, task.description) && status == task.status;
+        Task task = (Task) o;
+        return id == task.id && Objects.equals(name, task.name) && Objects.equals(description, task.description) && status == task.status;
     }
 
     @Override

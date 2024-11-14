@@ -169,8 +169,8 @@ public class TaskManager {
     }
 
     public List<Task> getAllTasks() {
-            return new ArrayList<>(this.tasks.values());
-        }
+        return new ArrayList<>(this.tasks.values());
+    }
 
     public List<Epic> getAllEpicTasks() {
         return new ArrayList<>(this.epicTasks.values());
