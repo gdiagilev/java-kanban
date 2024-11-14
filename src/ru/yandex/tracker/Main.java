@@ -1,10 +1,10 @@
-package java.yandex.tracker;
+package ru.yandex.tracker;
 
-import java.yandex.tracker.Model.Epic;
-import java.yandex.tracker.Model.Subtask;
-import Model.Task;
-import java.yandex.tracker.Service.Status;
-import java.yandex.tracker.Service.TaskManager;
+import ru.yandex.tracker.Model.Epic;
+import ru.yandex.tracker.Model.Subtask;
+import ru.yandex.tracker.Model.Task;
+import ru.yandex.tracker.Model.Status;
+import ru.yandex.tracker.Service.TaskManager;
 
 public class Main {
 
@@ -51,8 +51,6 @@ public class Main {
         manager.updateSubtask(subtask3);
         System.out.println("getAllSubTasksByEpicId");
         System.out.println(manager.getAllSubTasksByEpicId(epic1.getId()));
-        manager.deleteAllSubTasksInEpic(3);
-        System.out.println("deleteAllSubTasksInEpic");
         System.out.println(manager.getAllSubTasksByEpicId(epic1.getId()));
 
         System.out.println("Обновлённые задачи:");
@@ -62,9 +60,9 @@ public class Main {
         System.out.println("Обновлённые подзадачи:");
         System.out.println(manager.getAllSubtasks());
 
-        manager.deleteTask(task1);
-        manager.deleteEpicTask(epic2);
-        manager.deleteSubtask(subtask3);
+        manager.deleteTask(task1.getId());
+        manager.deleteEpicTask(epic2.getId());
+        manager.deleteSubtask(subtask3.getMainId());
 
         System.out.println("Финальные задачи:");
         System.out.println(manager.getAllTasks());

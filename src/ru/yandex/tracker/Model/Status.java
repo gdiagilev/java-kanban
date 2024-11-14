@@ -1,4 +1,4 @@
-package java.yandex.tracker.Service;
+package ru.yandex.tracker.Model;
 
 public enum Status {
     NEW,

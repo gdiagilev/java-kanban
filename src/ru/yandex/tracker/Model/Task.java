@@ -1,4 +1,4 @@
-package Model;
+package ru.yandex.tracker.Model;
 
 import java.util.Objects;
 
@@ -54,7 +54,7 @@ public class Task {
 
     @Override
     public String toString() {
-        return "Model.Task{" + "\n" +
+        return "java.yandex.tracker.Model.Task{" + "\n" +
                 "id=" + id + "," +
                 "name='" + name + "," +
                 "description='" + description + "," +

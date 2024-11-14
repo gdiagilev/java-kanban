@@ -1,6 +1,4 @@
-package java.yandex.tracker.Model;
-
-import Model.Task;
+package ru.yandex.tracker.Model;
 
 public class Subtask extends Task {
     private int epicId;

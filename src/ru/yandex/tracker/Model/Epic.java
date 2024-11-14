@@ -1,6 +1,4 @@
-package java.yandex.tracker.Model;
-
-import Model.Task;
+package ru.yandex.tracker.Model;
 
 import java.util.ArrayList;
 
@@ -15,27 +13,19 @@ public class Epic extends Task {
     public void addSubtask(Subtask task) {
         if (!subtasks.contains(task)) {
             subtasks.add(task);
-        } else {
-            System.out.println("Задача уже существует.");
         }
     }
 
-    public void removeSubtask(Subtask task) {
-        if (subtasks == null) {
-            System.out.println("Список задач пуст.");
-        } else {
+    public void removeSubtask(int task) {
+        if (subtasks != null) {
             if (subtasks.contains(task)) {
                 subtasks.remove(task);
-            } else {
-                System.out.println("Задача не найдена.");
             }
         }
     }
 
     public void removeAllSubtasks() {
-        if (subtasks == null) {
-            System.out.println("Список задач пуст.");
-        } else {
+        if (subtasks != null) {
             subtasks.clear();
         }
     }
