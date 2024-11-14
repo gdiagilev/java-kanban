@@ -1,3 +1,7 @@
+package java.yandex.tracker.Model;
+
+import Model.Task;
+
 public class Subtask extends Task {
     private int epicId;
 
@@ -10,7 +14,7 @@ public class Subtask extends Task {
     public String toString() {
         return "SubTask{" + "\n" +
                 "EpicId=" + epicId + "," +
-                "Status=" + super.getStatus() + "," +
+                "java.yandex.practicum.Service.Status=" + super.getStatus() + "," +
                 "Id=" + super.getId() + "," +
                 "Name=" + super.getName() + "," +
                 "Description=" + super.getDescription() + "," +

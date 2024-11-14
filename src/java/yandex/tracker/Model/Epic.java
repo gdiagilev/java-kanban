@@ -1,3 +1,7 @@
+package java.yandex.tracker.Model;
+
+import Model.Task;
+
 import java.util.ArrayList;
 
 public class Epic extends Task {
@@ -53,7 +57,7 @@ public class Epic extends Task {
 
     @Override
     public String toString() {
-        return "Epic{" + "\n" +
+        return "java.yandex.practicum.Model.Epic{" + "\n" +
                 "id=" + getId() + "\n" +
                 "status=" + getStatus() + "\n" +
                 "name='" + getName() + "\n" +

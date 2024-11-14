@@ -1,3 +1,11 @@
+package java.yandex.tracker;
+
+import java.yandex.tracker.Model.Epic;
+import java.yandex.tracker.Model.Subtask;
+import Model.Task;
+import java.yandex.tracker.Service.Status;
+import java.yandex.tracker.Service.TaskManager;
+
 public class Main {
 
     public static void main(String[] args) {
