@@ -4,7 +4,7 @@ import ru.yandex.tracker.Model.Epic;
 import ru.yandex.tracker.Model.Subtask;
 import ru.yandex.tracker.Model.Task;
 import ru.yandex.tracker.Model.Status;
-import ru.yandex.tracker.Service.TaskManager;
+import ru.yandex.tracker.Service.InMemoryTaskManager;
 
 public class Main {
 
@@ -19,7 +19,7 @@ public class Main {
         Epic epic2 = new Epic("Эпик 2", "Описание эпика 2");
         Subtask subtask3 = new Subtask(4, "Подзадача 1", "Подзадача 1 эпика 2", Status.NEW);
 
-        TaskManager manager = new TaskManager();
+        InMemoryTaskManager manager = new InMemoryTaskManager();
         manager.createTask(task1);
         manager.createTask(task2);
         manager.createEpicTask(epic1);
