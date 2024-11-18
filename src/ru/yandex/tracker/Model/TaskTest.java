@@ -48,9 +48,9 @@ public class TaskTest {
         manager.createEpicTask(epicTask);
         manager.createSubtask(subTask);
         Task task2  = new Task("task1","task1", Status.NEW);
-        assertInstanceOf(Task.class, manager.getTask(1), "Обьекты не совпадают");
-        assertInstanceOf(Epic.class, manager.getEpicTask(2), "Обьекты не совпадают");
-        assertInstanceOf(Subtask.class, manager.getSubtask(3), "Обьекты не совпадают");
+        assertInstanceOf(Task.class, manager.getTask(1), "Объекты не совпадают");
+        assertInstanceOf(Epic.class, manager.getEpicTask(2), "Объекты не совпадают");
+        assertInstanceOf(Subtask.class, manager.getSubtask(3), "Объекты не совпадают");
     }
 
     @Test
@@ -71,7 +71,7 @@ public class TaskTest {
         InMemoryHistoryManager historyManager  = (InMemoryHistoryManager) managers.getDefaultHistory();
         Task task  = new Task("task1","task1", Status.NEW);
         Epic epicTask   = new Epic("epicTask1","epicTask1");
-        Subtask subTask   = new Subtask(2,"subTask1","subTask1", Status.NEW);
+        Subtask subTask   = new Subtask(2,"subtask1","subtask1", Status.NEW);
         manager.createTask(task);
         manager.createEpicTask(epicTask);
         manager.createSubtask(subTask);
