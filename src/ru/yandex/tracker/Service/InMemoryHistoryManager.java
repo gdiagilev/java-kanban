@@ -3,17 +3,22 @@ package ru.yandex.tracker.Service;
 import ru.yandex.tracker.Model.Task;
 
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
+
+import static java.lang.Integer.MAX_VALUE;
 
 public class InMemoryHistoryManager implements HistoryManager {
     private List<Task> history;
+    private static int MAX_VALUE = 9;
 
     public InMemoryHistoryManager(){
-        history = new ArrayList<>();
+        history = new LinkedList<>();
     }
+
     @Override
     public void add(Task task) {
-        if (history.size() > 9){
+        if (history.size() > MAX_VALUE){
             history.removeFirst();
         }
         history.add(task);
@@ -21,7 +26,6 @@ public class InMemoryHistoryManager implements HistoryManager {
 
     @Override
     public List<Task> getHistory()  {
-        List<Task> history = this.history;
-        return history;
+        return new ArrayList<>(history);
     }
 }

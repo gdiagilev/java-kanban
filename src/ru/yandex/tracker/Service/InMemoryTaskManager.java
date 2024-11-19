@@ -4,6 +4,7 @@ import ru.yandex.tracker.Model.Epic;
 import ru.yandex.tracker.Model.Status;
 import ru.yandex.tracker.Model.Subtask;
 import ru.yandex.tracker.Model.Task;
+import ru.yandex.tracker.Model.Managers;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -20,31 +21,37 @@ public class InMemoryTaskManager implements TaskManager {
         tasks = new HashMap<>();
         epicTasks = new HashMap<>();
         subtasks = new HashMap<>();
-        history  = new InMemoryHistoryManager();
+        history  = Managers.getDefaultHistory();
     }
 
     @Override
     public Task getTask(int id) {
-        if (tasks.containsKey(id)) {
-            history.add(tasks.get(id));
-            return tasks.get(id);
-        } else return null;
+        final Task task = tasks.get(id);
+            if (task == null) {
+                return task;
+            }
+        history.add(task);
+        return task;
     }
 
     @Override
     public Epic getEpicTask(int id) {
-        if (epicTasks.containsKey(id)) {
-            history.add(epicTasks.get(id));
-            return epicTasks.get(id);
-        } else return null;
+        final Epic epic = epicTasks.get(id);
+        if (epic == null) {
+            return epic;
+        }
+        history.add(epic);
+        return epic;
     }
 
     @Override
     public Subtask getSubtask(int id) {
-        if (subtasks.containsKey(id)) {
-            history.add(subtasks.get(id));
-            return subtasks.get(id);
-        } else return null;
+        final Subtask subtask = subtasks.get(id);
+        if (subtask == null) {
+            return subtask;
+        }
+        history.add(subtask);
+        return subtask;
     }
 
     @Override
@@ -215,7 +222,7 @@ public class InMemoryTaskManager implements TaskManager {
         ArrayList<Task> allTasks = new ArrayList<>();
         for (Task task : tasks.values()) {
             allTasks.add(task);
-            history.add(task);
+            return new ArrayList<>(tasks.values());
         }
         return allTasks;
     }
@@ -225,7 +232,7 @@ public class InMemoryTaskManager implements TaskManager {
         ArrayList<Epic> allEpicTasks = new ArrayList<>();
         for (Epic epicTask : epicTasks.values()) {
             allEpicTasks.add(epicTask);
-            history.add(epicTask);
+            return new ArrayList<>(epicTasks.values());
         }
         return allEpicTasks;
     }
@@ -235,7 +242,7 @@ public class InMemoryTaskManager implements TaskManager {
         ArrayList<Subtask> allSubTasks = new ArrayList<>();
         for (Subtask subTask : subtasks.values()) {
             allSubTasks.add(subTask);
-            history.add(subTask);
+            return new ArrayList<>(subtasks.values());
         }
         return allSubTasks;
     }
