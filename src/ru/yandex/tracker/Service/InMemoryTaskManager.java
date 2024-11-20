@@ -4,7 +4,6 @@ import ru.yandex.tracker.Model.Epic;
 import ru.yandex.tracker.Model.Status;
 import ru.yandex.tracker.Model.Subtask;
 import ru.yandex.tracker.Model.Task;
-import ru.yandex.tracker.Model.Managers;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -219,32 +218,17 @@ public class InMemoryTaskManager implements TaskManager {
 
     @Override
     public List<Task> getAllTasks() {
-        ArrayList<Task> allTasks = new ArrayList<>();
-        for (Task task : tasks.values()) {
-            allTasks.add(task);
-            return new ArrayList<>(tasks.values());
-        }
-        return allTasks;
+        return new ArrayList<>(this.tasks.values());
     }
 
     @Override
     public List<Epic> getAllEpicTasks() {
-        ArrayList<Epic> allEpicTasks = new ArrayList<>();
-        for (Epic epicTask : epicTasks.values()) {
-            allEpicTasks.add(epicTask);
-            return new ArrayList<>(epicTasks.values());
-        }
-        return allEpicTasks;
+        return new ArrayList<>(this.epicTasks.values());
     }
 
     @Override
     public List<Subtask> getAllSubTasks() {
-        ArrayList<Subtask> allSubTasks = new ArrayList<>();
-        for (Subtask subTask : subtasks.values()) {
-            allSubTasks.add(subTask);
-            return new ArrayList<>(subtasks.values());
-        }
-        return allSubTasks;
+        return List.of();
     }
 
     @Override
