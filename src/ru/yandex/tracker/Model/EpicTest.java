@@ -64,7 +64,7 @@ class EpicTaskTest {
         List<Subtask> subTasks  = new ArrayList<>();
         subTasks.add(subtask1);
         subTasks.add(subtask2);
-        List<Subtask> actualSubTasks = manager.getAllSubTasks();
+        List<Subtask> actualSubTasks = manager.getAllSubtasks();
         assertArrayEquals(actualSubTasks.toArray(), subTasks.toArray());
     }
 }
