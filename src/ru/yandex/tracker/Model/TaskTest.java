@@ -55,7 +55,7 @@ public class TaskTest {
     }
 
     @Test
-    void inMemoryTaskManagerSearchTestByID() {
+    void InMemoryTaskManagerSearchTestByID() {
         Task task = new Task("task1","task1", Status.NEW);
         Epic epicTask = new Epic("epicTask1","epicTask1");
         Subtask subTask = new Subtask(2,"subTask1","subTask1", Status.NEW);
@@ -68,7 +68,7 @@ public class TaskTest {
     }
 
     @Test
-    void historyManagerTestOfObjects() {
+    void HistoryManagerTestOfObjects() {
         InMemoryHistoryManager historyManager  = (InMemoryHistoryManager) managers.getDefaultHistory();
         Task task  = new Task("task1","task1", Status.NEW);
         Epic epicTask   = new Epic("epicTask1","epicTask1");
@@ -88,4 +88,31 @@ public class TaskTest {
         historyToCompare = historyManager.getHistory();
         assertEquals(history, historyToCompare);
     }
+
+    @Test
+    void addAndRemoveInMemoryHistoryManager() {
+        InMemoryHistoryManager historyManager = (InMemoryHistoryManager) managers.getDefaultHistory();
+        Task task1 = new Task("Task1", "Task1", Status.NEW);
+        Task task2 = new Task("Task2", "Task2", Status.NEW);
+        Task task3 = new Task("Task3", "Task3", Status.NEW);
+        manager.createTask(task1);
+        manager.createTask(task2);
+        manager.createTask(task3);
+
+        List<Task> history = new ArrayList<>();
+        history.add(task1);
+        history.add(task2);
+        history.add(task3);
+        historyManager.add(task1);
+        historyManager.add(task2);
+        historyManager.add(task3);
+        List<Task> historyToCompare = historyManager.getHistory();
+        Assertions.assertEquals(history, historyToCompare);
+
+        historyManager.remove(1);
+        history.remove(task1);
+        historyToCompare = historyManager.getHistory();
+        Assertions.assertEquals(history, historyToCompare);
+    }
 }
+

@@ -5,7 +5,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import ru.yandex.tracker.Service.InMemoryTaskManager;
 import ru.yandex.tracker.Service.Managers;
-
+import ru.yandex.tracker.Service.InMemoryHistoryManager;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -66,5 +66,31 @@ class EpicTaskTest {
         subTasks.add(subtask2);
         List<Subtask> actualSubTasks = manager.getAllSubtasks();
         assertArrayEquals(actualSubTasks.toArray(), subTasks.toArray());
+    }
+
+    @Test
+    void addAndRemoveInMemoryHistoryManager() {
+        InMemoryHistoryManager historyManager = (InMemoryHistoryManager) managers.getDefault();
+        Epic task1 = new Epic("Epic1", "Task1");
+        Epic task2 = new Epic("Epic2", "Task2");
+        Epic task3 = new Epic("Epic3", "Task3");
+        manager.createEpicTask(task1);
+        manager.createEpicTask(task2);
+        manager.createEpicTask(task3);
+
+        List<Task> history = new ArrayList<>();
+        history.add(task1);
+        history.add(task2);
+        history.add(task3);
+        historyManager.add(task1);
+        historyManager.add(task2);
+        historyManager.add(task3);
+        List<Task> historyToCompare = historyManager.getHistory();
+        Assertions.assertEquals(history, historyToCompare);
+
+        historyManager.remove(1);
+        history.remove(task1);
+        historyToCompare = historyManager.getHistory();
+        Assertions.assertEquals(history, historyToCompare);
     }
 }
