@@ -1,8 +1,12 @@
-package ru.yandex.tracker.Model;
+package ru.yandex.tracker.Tests;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import ru.yandex.tracker.Model.Epic;
+import ru.yandex.tracker.Model.Status;
+import ru.yandex.tracker.Model.Subtask;
+import ru.yandex.tracker.Model.Task;
 import ru.yandex.tracker.Service.InMemoryHistoryManager;
 import ru.yandex.tracker.Service.InMemoryTaskManager;
 import ru.yandex.tracker.Service.Managers;
