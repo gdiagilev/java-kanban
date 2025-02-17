@@ -55,7 +55,7 @@ public class TaskTest {
     }
 
     @Test
-    void InMemoryTaskManagerSearchTestByID() {
+    void inMemoryTaskManagerSearchTestByID() {
         Task task = new Task("task1","task1", Status.NEW);
         Epic epicTask = new Epic("epicTask1","epicTask1");
         Subtask subTask = new Subtask(2,"subTask1","subTask1", Status.NEW);
@@ -68,7 +68,7 @@ public class TaskTest {
     }
 
     @Test
-    void HistoryManagerTestOfObjects() {
+    void historyManagerTestOfObjects() {
         InMemoryHistoryManager historyManager  = (InMemoryHistoryManager) managers.getDefaultHistory();
         Task task  = new Task("task1","task1", Status.NEW);
         Epic epicTask   = new Epic("epicTask1","epicTask1");
