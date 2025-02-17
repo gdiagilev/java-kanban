@@ -14,7 +14,7 @@ public class InMemoryHistoryManager implements HistoryManager {
     private int size = 0;
     private Map<Integer, Node> historyMap = new HashMap<>();
 
-    public InMemoryHistoryManager(){
+    public InMemoryHistoryManager() {
         historyMap = new HashMap<>();
     }
 
@@ -35,7 +35,7 @@ public class InMemoryHistoryManager implements HistoryManager {
     }
 
     @Override
-    public List<Task> getHistory()  {
+    public List<Task> getHistory() {
         return getTasks();
     }
 
