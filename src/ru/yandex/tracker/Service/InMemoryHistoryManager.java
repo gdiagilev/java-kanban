@@ -12,20 +12,20 @@ public class InMemoryHistoryManager implements HistoryManager {
     private List<Task> history;
     private static int MAX_VALUE = 9;
 
-    public InMemoryHistoryManager(){
+    public InMemoryHistoryManager() {
         history = new LinkedList<>();
     }
 
     @Override
     public void add(Task task) {
-        if (history.size() > MAX_VALUE){
+        if (history.size() > MAX_VALUE) {
             history.removeFirst();
         }
         history.add(task);
     }
 
     @Override
-    public List<Task> getHistory()  {
+    public List<Task> getHistory() {
         return new ArrayList<>(history);
     }
 }
