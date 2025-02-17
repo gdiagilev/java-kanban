@@ -25,7 +25,7 @@ public class TaskTest {
     }
 
     @Test
-    void checkTaskById(){
+    void checkTaskById() {
         Task task = new Task("task1","task1", Status.NEW);
         Task task2  = new Task("task1","task1", Status.NEW);
         manager.createTask(task);
@@ -34,14 +34,14 @@ public class TaskTest {
     }
 
     @Test
-    void checkEqualsTaskbyId(){
+    void checkEqualsTaskbyId() {
         Task task = new Task("task1","task1", Status.NEW);
         manager.createTask(task);
         Assertions.assertEquals(task, manager.getTask(1));
     }
 
     @Test
-    void validCreationfOfObjects(){
+    void validCreationfOfObjects() {
         Task task = new Task("task1","task1", Status.NEW);
         Epic epicTask = new Epic("epicTask1","epicTask1");
         Subtask subTask = new Subtask(2,"subTask1","subTask1", Status.NEW);
@@ -55,7 +55,7 @@ public class TaskTest {
     }
 
     @Test
-    void InMemoryTaskManagerSearchTestByID(){
+    void InMemoryTaskManagerSearchTestByID() {
         Task task = new Task("task1","task1", Status.NEW);
         Epic epicTask = new Epic("epicTask1","epicTask1");
         Subtask subTask = new Subtask(2,"subTask1","subTask1", Status.NEW);
@@ -68,7 +68,7 @@ public class TaskTest {
     }
 
     @Test
-    void HistoryManagerTestOfObjects(){
+    void HistoryManagerTestOfObjects() {
         InMemoryHistoryManager historyManager  = (InMemoryHistoryManager) managers.getDefaultHistory();
         Task task  = new Task("task1","task1", Status.NEW);
         Epic epicTask   = new Epic("epicTask1","epicTask1");
