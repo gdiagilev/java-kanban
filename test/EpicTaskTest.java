@@ -72,7 +72,7 @@ class EpicTaskTest {
 
     @Test
     void addAndRemoveInMemoryHistoryManager() {
-        InMemoryHistoryManager historyManager = (InMemoryHistoryManager) managers.getDefaultHistory();
+        InMemoryHistoryManager historyManager = (InMemoryHistoryManager) Managers.getDefaultHistory();
         Epic task1 = new Epic("Epic1", "Task1");
         Epic task2 = new Epic("Epic2", "Task2");
         Epic task3 = new Epic("Epic3", "Task3");

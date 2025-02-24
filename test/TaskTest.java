@@ -93,7 +93,7 @@ public class TaskTest {
 
     @Test
     void addAndRemoveInMemoryHistoryManager() {
-        InMemoryHistoryManager historyManager = (InMemoryHistoryManager) managers.getDefaultHistory();
+        InMemoryHistoryManager historyManager = (InMemoryHistoryManager) Managers.getDefaultHistory();
         Task task1 = new Task("Task1", "Task1", Status.NEW);
         Task task2 = new Task("Task2", "Task2", Status.NEW);
         Task task3 = new Task("Task3", "Task3", Status.NEW);
