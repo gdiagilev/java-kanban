@@ -180,7 +180,6 @@ public class InMemoryTaskManager implements TaskManager {
             epicTask.removeSubtask(id);
             autoSetEpicStatus(mainId);
         }
-
         subtasks.remove(id);
     }
 
