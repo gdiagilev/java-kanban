@@ -40,8 +40,8 @@ class EpicTaskTest {
         Subtask subtask1 = new Subtask(epicTask1.getId(), "Подзадача 1", "Подзадача эпика 1", Status.NEW);
         manager.createSubtask(subtask1);
 
-        int subtaskId = subtask1.getId(); // Получаем правильный ID
-        manager.deleteSubtask(subtask1);
+        int subtaskId = subtask1.getId();
+        manager.deleteSubtask(subtaskId);
 
         Assertions.assertNull(manager.getSubtask(subtaskId), "Подзадача не удалена");
     }

@@ -181,6 +181,7 @@ public class InMemoryTaskManager implements TaskManager {
             autoSetEpicStatus(mainId);
         }
         subtasks.remove(id);
+        
     }
 
     @Override
