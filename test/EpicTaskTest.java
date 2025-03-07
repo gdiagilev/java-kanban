@@ -94,7 +94,7 @@ class EpicTaskTest {
         List<Task> historyToCompare = historyManager.getHistory();
         Assertions.assertEquals(history, historyToCompare);
 
-        historyManager.remove(1);
+        historyManager.remove(task1.getId());
         history.remove(task1);
         historyToCompare = historyManager.getHistory();
         Assertions.assertEquals(history, historyToCompare);
