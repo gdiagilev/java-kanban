@@ -112,7 +112,7 @@ public class TaskTest {
         Assertions.assertEquals(history, historyToCompare);
 
         historyManager.remove(1);
-        history.remove(task1);
+        history.remove(1);
         historyToCompare = historyManager.getHistory();
         Assertions.assertEquals(history, historyToCompare);
     }
