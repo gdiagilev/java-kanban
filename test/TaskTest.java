@@ -1,8 +1,10 @@
-package ru.yandex.tracker.Model;
-
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import ru.yandex.tracker.Model.Epic;
+import ru.yandex.tracker.Model.Status;
+import ru.yandex.tracker.Model.Subtask;
+import ru.yandex.tracker.Model.Task;
 import ru.yandex.tracker.Service.InMemoryHistoryManager;
 import ru.yandex.tracker.Service.InMemoryTaskManager;
 import ru.yandex.tracker.Service.Managers;
@@ -88,4 +90,31 @@ public class TaskTest {
         historyToCompare = historyManager.getHistory();
         assertEquals(history, historyToCompare);
     }
+
+    @Test
+    void addAndRemoveInMemoryHistoryManager() {
+        InMemoryHistoryManager historyManager = (InMemoryHistoryManager) Managers.getDefaultHistory();
+        Task task1 = new Task("Task1", "Task1", Status.NEW);
+        Task task2 = new Task("Task2", "Task2", Status.NEW);
+        Task task3 = new Task("Task3", "Task3", Status.NEW);
+        manager.createTask(task1);
+        manager.createTask(task2);
+        manager.createTask(task3);
+
+        List<Task> history = new ArrayList<>();
+        history.add(task1);
+        history.add(task2);
+        history.add(task3);
+        historyManager.add(task1);
+        historyManager.add(task2);
+        historyManager.add(task3);
+        List<Task> historyToCompare = historyManager.getHistory();
+        Assertions.assertEquals(history, historyToCompare);
+
+        historyManager.remove(1);
+        history.remove(task1);
+        historyToCompare = historyManager.getHistory();
+        Assertions.assertEquals(history, historyToCompare);
+    }
 }
+
