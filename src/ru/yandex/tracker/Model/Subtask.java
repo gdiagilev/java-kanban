@@ -3,20 +3,16 @@ package ru.yandex.tracker.Model;
 public class Subtask extends Task {
     private int epicId;
 
+    // Конструктор для создания новой подзадачи (id создаётся менеджером)
     public Subtask(int epicId, String name, String description, Status status) {
         super(name, description, status);
         this.epicId = epicId;
     }
 
-    @Override
-    public String toString() {
-        return "SubTask{" + "\n" +
-                "EpicId=" + epicId + "," +
-                "java.yandex.practicum.Service.Status=" + super.getStatus() + "," +
-                "Id=" + super.getId() + "," +
-                "Name=" + super.getName() + "," +
-                "Description=" + super.getDescription() + "," +
-                "}" + "\n";
+    // Конструктор для восстановления из файла (id задаётся вручную)
+    public Subtask(int epicId, String name, String description, Status status, int id) {
+        super(name, description, id, status);
+        this.epicId = epicId;
     }
 
     public int getEpicId() {
@@ -27,7 +23,19 @@ public class Subtask extends Task {
         this.epicId = epicId;
     }
 
-    public int getMainId() {
-        return epicId;
+    @Override
+    public TaskType getTaskType() {
+        return TaskType.SUBTASK;
+    }
+
+    @Override
+    public String toString() {
+        return "Subtask{" +
+                "id=" + getId() +
+                ", name='" + getName() + '\'' +
+                ", status=" + getStatus() +
+                ", description='" + getDescription() + '\'' +
+                ", epicId=" + epicId +
+                '}';
     }
 }

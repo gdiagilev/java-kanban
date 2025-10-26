@@ -1,19 +1,27 @@
 package ru.yandex.tracker.Model;
 
-import java.util.Objects;
-
 public class Task {
-    private int id;
-    private String name;
-    private String description;
-    private Status status;
+    protected int id;
+    protected String name;
+    protected String description;
+    protected Status status;
 
+    // Конструктор для новых задач (id генерируется менеджером)
     public Task(String name, String description, Status status) {
         this.name = name;
         this.description = description;
         this.status = status;
     }
 
+    // Конструктор для восстановления задач из файла (id уже известен)
+    public Task(String name, String description, int id, Status status) {
+        this.id = id;
+        this.name = name;
+        this.description = description;
+        this.status = status;
+    }
+
+    // Геттеры и сеттеры
     public int getId() {
         return id;
     }
@@ -27,12 +35,6 @@ public class Task {
     }
 
     public void setName(String name) {
-        this.name = name;
-    }
-
-    public void update(String name, String description, Status status) {
-        this.status = status;
-        this.description = description;
         this.name = name;
     }
 
@@ -52,30 +54,17 @@ public class Task {
         this.status = status;
     }
 
+    public TaskType getTaskType() {
+        return TaskType.TASK;
+    }
+
     @Override
     public String toString() {
-        return "java.yandex.tracker.Model.Task{" + "\n" +
-                "id=" + id + "," +
-                "name='" + name + "," +
-                "description='" + description + "," +
-                "status=" + status + "," +
-                "\n" +
-                "}";
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        } else if (o == null || getClass() != o.getClass()) {
-            return false;
-        }
-        Task task = (Task) o;
-        return id == task.id && Objects.equals(name, task.name) && Objects.equals(description, task.description) && status == task.status;
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(id, name, status);
+        return "Task{" +
+                "id=" + id +
+                ", name='" + name + '\'' +
+                ", status=" + status +
+                ", description='" + description + '\'' +
+                '}';
     }
 }
