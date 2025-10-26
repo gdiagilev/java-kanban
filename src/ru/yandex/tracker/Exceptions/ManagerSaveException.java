@@ -1,8 +1,8 @@
 package ru.yandex.tracker.Exceptions;
 
-public class ManagerSaveException extends RuntimeException{
+public class ManagerSaveException extends RuntimeException {
     public ManagerSaveException() {
-        super();
+        super("Ошибка при сохранении данных");
     }
 
     public ManagerSaveException(String message) {
