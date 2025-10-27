@@ -168,25 +168,48 @@ public class InMemoryTaskManager implements TaskManager {
 
     @Override
     public void deleteAllTasks() {
-        tasks.clear();
-        history.clear();
+        for (Task task : new ArrayList<>(tasks.values())) { // создаём копию, чтобы не было ConcurrentModificationException
+            if (task.getTaskType() == TaskType.TASK) { // удаляем только обычные задачи
+                history.remove(task.getId());
+                tasks.remove(task.getId());
+            }
+        }
     }
+
+
 
     @Override
     public void deleteAllEpicTasks() {
-        epicTasks.clear();
-        subtasks.clear();
-        history.clear();
+        for (Subtask subtask : subtasks.values()) {
+            history.remove(subtask.getId());
+        }
+
+        for (Integer id : new ArrayList<>(subtasks.keySet())) {
+            subtasks.remove(id);
+        }
+
+        for (Integer id : new ArrayList<>(epicTasks.keySet())) {
+            epicTasks.remove(id);
+        }
     }
+
 
     @Override
     public void deleteAllSubtasks() {
+        for (Subtask subtask : subtasks.values()) {
+            history.remove(subtask.getId());
+        }
+
         for (Epic epic : epicTasks.values()) {
             epic.removeAllSubtasks();
             autoSetEpicStatus(epic.getId());
         }
-        subtasks.clear();
+
+        for (Integer id : new ArrayList<>(subtasks.keySet())) {
+            subtasks.remove(id);
+        }
     }
+
 
     private void autoSetEpicStatus(int id) {
         Epic epic = epicTasks.get(id);

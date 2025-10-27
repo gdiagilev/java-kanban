@@ -12,7 +12,7 @@ import java.util.stream.Collectors;
 public class FileBackedTaskManager extends InMemoryTaskManager {
 
     private final File file;
-    private static final String HEADER = "id,type,name,status,description,startTime,endTime,duration,epic";
+    private static final String HEADER = "id,type,name,status,description, epic";
 
     public FileBackedTaskManager() {
         this(new File("./resources/kanban.csv"));
@@ -133,37 +133,22 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
     }
 
     private String toString(Task task) {
+        String epicId = "";
+
+        if (task instanceof Subtask) {
+            epicId = String.valueOf(((Subtask) task).getEpicId());
+        }
+
         return String.join(",",
                 String.valueOf(task.getId()),
                 task.getTaskType().name(),
                 task.getName(),
                 task.getStatus().name(),
                 task.getDescription(),
-                "", "", "", ""
+                "", "", "", epicId
         );
     }
 
-    private String toString(Epic epic) {
-        return String.join(",",
-                String.valueOf(epic.getId()),
-                epic.getTaskType().name(),
-                epic.getName(),
-                epic.getStatus().name(),
-                epic.getDescription(),
-                "", "", "", ""
-        );
-    }
-
-    private String toString(Subtask subtask) {
-        return String.join(",",
-                String.valueOf(subtask.getId()),
-                subtask.getTaskType().name(),
-                subtask.getName(),
-                subtask.getStatus().name(),
-                subtask.getDescription(),
-                "", "", "", String.valueOf(subtask.getEpicId())
-        );
-    }
 
     @Override
     public void createTask(Task task) {
