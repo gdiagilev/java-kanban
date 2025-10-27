@@ -12,14 +12,26 @@ import java.util.stream.Collectors;
 public class FileBackedTaskManager extends InMemoryTaskManager {
 
     private final File file;
-    private static final String HEADER = "id,type,name,status,description, epic";
+    private static final String HEADER = "id,type,name,status,description,epic";
 
     public FileBackedTaskManager() {
-        this(new File("./resources/kanban.csv"));
+        // создаём файл в системной временной директории, чтобы тесты всегда имели доступ
+        this(new File(System.getProperty("java.io.tmpdir"), "kanban.csv"));
     }
 
     public FileBackedTaskManager(File file) {
         this.file = file;
+        try {
+            File parent = file.getParentFile();
+            if (parent != null && !parent.exists()) {
+                parent.mkdirs(); // создаём директорию, если её нет
+            }
+            if (!file.exists()) {
+                file.createNewFile(); // создаём пустой файл
+            }
+        } catch (IOException e) {
+            throw new ManagerSaveException("Ошибка при создании файла: " + file.getAbsolutePath());
+        }
     }
 
     protected static FileBackedTaskManager loadFromFile(File file) {
@@ -149,6 +161,7 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
         );
     }
 
+    // Переопределённые методы с автосохранением
 
     @Override
     public void createTask(Task task) {
