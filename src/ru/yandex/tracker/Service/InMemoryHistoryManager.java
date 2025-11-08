@@ -1,7 +1,6 @@
 package ru.yandex.tracker.Service;
 
 import ru.yandex.tracker.Model.Task;
-
 import java.util.*;
 
 public class InMemoryHistoryManager implements HistoryManager {
@@ -9,6 +8,7 @@ public class InMemoryHistoryManager implements HistoryManager {
     private final Map<Integer, Node<Task>> nodeMap = new HashMap<>();
     private Node<Task> head;
     private Node<Task> tail;
+    private int autoId = 1;
 
     private static class Node<T> {
         T data;
@@ -25,6 +25,10 @@ public class InMemoryHistoryManager implements HistoryManager {
     @Override
     public void add(Task task) {
         if (task == null) return;
+
+        if (task.getId() == 0) {
+            task.setId(autoId++);
+        }
 
         remove(task.getId());
 
