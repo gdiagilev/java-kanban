@@ -10,11 +10,11 @@ public class InMemoryHistoryManager implements HistoryManager {
     private Node<Task> tail;
 
     private static class Node<T> {
-        public T data;
-        public Node<T> next;
-        public Node<T> prev;
+        T data;
+        Node<T> next;
+        Node<T> prev;
 
-        public Node(Node<T> prev, T data, Node<T> next) {
+        Node(Node<T> prev, T data, Node<T> next) {
             this.prev = prev;
             this.data = data;
             this.next = next;
