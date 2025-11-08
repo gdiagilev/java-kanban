@@ -15,7 +15,6 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
     private static final String HEADER = "id,type,name,status,description,epic";
 
     public FileBackedTaskManager() {
-        // создаём файл в системной временной директории, чтобы тесты всегда имели доступ
         this(new File(System.getProperty("java.io.tmpdir"), "kanban.csv"));
     }
 
@@ -24,10 +23,10 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
         try {
             File parent = file.getParentFile();
             if (parent != null && !parent.exists()) {
-                parent.mkdirs(); // создаём директорию, если её нет
+                parent.mkdirs();
             }
             if (!file.exists()) {
-                file.createNewFile(); // создаём пустой файл
+                file.createNewFile();
             }
         } catch (IOException e) {
             throw new ManagerSaveException("Ошибка при создании файла: " + file.getAbsolutePath());
@@ -46,7 +45,7 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
             int emptyIndex = lines.indexOf("");
             List<String> taskLines;
             if (emptyIndex != -1) {
-                taskLines = lines.subList(1, emptyIndex); // пропускаем заголовок
+                taskLines = lines.subList(1, emptyIndex);
                 if (emptyIndex + 1 < lines.size()) {
                     historyIds = historyFromString(lines.get(emptyIndex + 1));
                 }
@@ -160,8 +159,6 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
                 "", "", "", epicId
         );
     }
-
-    // Переопределённые методы с автосохранением
 
     @Override
     public void createTask(Task task) {
