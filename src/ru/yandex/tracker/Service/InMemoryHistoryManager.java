@@ -6,7 +6,6 @@ import ru.yandex.tracker.Model.Node;
 import java.util.*;
 
 public class InMemoryHistoryManager implements HistoryManager {
-
     private Node<Task> head;
     private Node<Task> tail;
     private final Map<Integer, Node<Task>> historyMap = new HashMap<>();
@@ -17,11 +16,8 @@ public class InMemoryHistoryManager implements HistoryManager {
 
         int id = task.getId();
 
-        if (historyMap.containsKey(id)) {
-            removeNode(historyMap.get(id));
-        }
+        remove(id);
 
-        // Добавляем в конец
         Node<Task> newNode = linkLast(task);
         historyMap.put(id, newNode);
     }
@@ -34,24 +30,26 @@ public class InMemoryHistoryManager implements HistoryManager {
 
     @Override
     public List<Task> getHistory() {
-        List<Task> history = new ArrayList<>();
+        List<Task> tasks = new ArrayList<>();
         Node<Task> current = head;
         while (current != null) {
-            history.add(current.task);
+            tasks.add(current.task);
             current = current.next;
         }
-        return history;
+        return tasks;
     }
 
     private Node<Task> linkLast(Task task) {
         final Node<Task> oldTail = tail;
         final Node<Task> newNode = new Node<>(oldTail, task, null);
         tail = newNode;
+
         if (oldTail == null) {
             head = newNode;
         } else {
             oldTail.next = newNode;
         }
+
         return newNode;
     }
 
