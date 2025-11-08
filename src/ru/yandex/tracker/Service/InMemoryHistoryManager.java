@@ -1,6 +1,7 @@
 package ru.yandex.tracker.Service;
 
 import ru.yandex.tracker.Model.Task;
+
 import java.util.*;
 
 public class InMemoryHistoryManager implements HistoryManager {
@@ -26,7 +27,7 @@ public class InMemoryHistoryManager implements HistoryManager {
         if (task == null) return;
 
         remove(task.getId());
-        
+
         Node<Task> newNode = new Node<>(tail, task, null);
         if (tail != null) {
             tail.next = newNode;
