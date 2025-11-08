@@ -26,7 +26,7 @@ public class InMemoryHistoryManager implements HistoryManager {
         if (task == null) return;
 
         remove(task.getId());
-
+        
         Node<Task> newNode = new Node<>(tail, task, null);
         if (tail != null) {
             tail.next = newNode;
