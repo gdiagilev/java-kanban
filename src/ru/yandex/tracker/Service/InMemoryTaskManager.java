@@ -144,7 +144,6 @@ public class InMemoryTaskManager implements TaskManager {
         }
         Optional.ofNullable(tasks.get(task.getId()))
                 .ifPresent(t -> tasks.put(task.getId(), task));
-
         addToPrioritizedTasks(task);
     }
 
@@ -188,8 +187,10 @@ public class InMemoryTaskManager implements TaskManager {
                     epic.getSubtasks().forEach(sub -> {
                         subtasks.remove(sub.getId());
                         history.remove(sub.getId());
+                        removeFromPrioritizedTasks(sub);
                     });
                     history.remove(epic.getId());
+                    removeFromPrioritizedTasks(epic);
                 });
     }
 
@@ -203,17 +204,22 @@ public class InMemoryTaskManager implements TaskManager {
 
     @Override
     public void deleteTask(int id) {
-        Optional.ofNullable(tasks.remove(id)).ifPresent(t -> history.remove(id));
+        Optional.ofNullable(tasks.remove(id)).ifPresent(task -> {
+            history.remove(id);
+            removeFromPrioritizedTasks(task);
+        });
     }
 
     @Override
     public void deleteEpicTask(int id) {
         Optional.ofNullable(epicTasks.remove(id)).ifPresent(epic -> {
-            epic.getSubtasks().forEach(s -> {
-                subtasks.remove(s.getId());
-                history.remove(s.getId());
+            epic.getSubtasks().forEach(sub -> {
+                subtasks.remove(sub.getId());
+                history.remove(sub.getId());
+                removeFromPrioritizedTasks(sub);
             });
             history.remove(id);
+            removeFromPrioritizedTasks(epic);
         });
     }
 
@@ -226,48 +232,47 @@ public class InMemoryTaskManager implements TaskManager {
                         autoSetEpicStatus(epic.getId());
                     });
             history.remove(id);
+            removeFromPrioritizedTasks(subtask);
         });
     }
 
     @Override
     public void deleteAllTasks() {
-        tasks.values().stream()
-                .filter(task -> task.getTaskType() == TaskType.TASK)
-                .map(Task::getId)
-                .toList()
-                .forEach(id -> {
-                    history.remove(id);
-                    tasks.remove(id);
-                });
+        tasks.values().forEach(task -> {
+            history.remove(task.getId());
+            removeFromPrioritizedTasks(task);
+        });
+        tasks.clear();
     }
-
-
 
     @Override
     public void deleteAllEpicTasks() {
-        subtasks.values().stream()
-                .map(Subtask::getId)
-                .forEach(history::remove);
-
-        new ArrayList<>(subtasks.keySet()).forEach(subtasks::remove);
-        new ArrayList<>(epicTasks.keySet()).forEach(epicTasks::remove);
+        subtasks.values().forEach(sub -> {
+            history.remove(sub.getId());
+            removeFromPrioritizedTasks(sub);
+        });
+        epicTasks.values().forEach(epic -> {
+            history.remove(epic.getId());
+            removeFromPrioritizedTasks(epic);
+        });
+        subtasks.clear();
+        epicTasks.clear();
     }
-
 
     @Override
     public void deleteAllSubtasks() {
-        subtasks.values().stream()
-                .map(Subtask::getId)
-                .forEach(history::remove);
+        subtasks.values().forEach(sub -> {
+            history.remove(sub.getId());
+            removeFromPrioritizedTasks(sub);
+        });
 
         epicTasks.values().forEach(epic -> {
             epic.removeAllSubtasks();
             autoSetEpicStatus(epic.getId());
         });
 
-        new ArrayList<>(subtasks.keySet()).forEach(subtasks::remove);
+        subtasks.clear();
     }
-
 
     private void autoSetEpicStatus(int id) {
         Optional.ofNullable(epicTasks.get(id)).ifPresent(epic -> {
