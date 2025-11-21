@@ -1,94 +1,76 @@
 package ru.yandex.tracker.Service;
 
 import ru.yandex.tracker.Model.Task;
-import ru.yandex.tracker.Model.Node;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.List;
+import java.util.*;
 
 public class InMemoryHistoryManager implements HistoryManager {
+
+    private final Map<Integer, Node<Task>> nodeMap = new HashMap<>();
     private Node<Task> head;
     private Node<Task> tail;
-    private int size = 0;
-    private Map<Integer, Node> historyMap = new HashMap<>();
+    private int autoId = 1;
 
-    public InMemoryHistoryManager() {
-        historyMap = new HashMap<>();
+    private static class Node<T> {
+        T data;
+        Node<T> next;
+        Node<T> prev;
+
+        Node(Node<T> prev, T data, Node<T> next) {
+            this.prev = prev;
+            this.data = data;
+            this.next = next;
+        }
     }
 
     @Override
     public void add(Task task) {
-        if (task == null) {
-            return;
-        }
-        final int id = task.getId();
-        removeNode(historyMap.remove(id));
-        linkedLast(task);
-        historyMap.put(id, tail);
-    }
+        if (task == null) return;
 
-    @Override
-    public void remove(int id) {
-        if (historyMap.containsKey(id)) {
-            removeNode(historyMap.remove(id));
+        if (task.getId() == 0) {
+            task.setId(autoId++);
         }
+
+        remove(task.getId());
+
+        Node<Task> newNode = new Node<>(tail, task, null);
+        if (tail != null) {
+            tail.next = newNode;
+        } else {
+            head = newNode;
+        }
+        tail = newNode;
+        nodeMap.put(task.getId(), newNode);
     }
 
     @Override
     public List<Task> getHistory() {
-        return getTasks();
+        List<Task> history = new ArrayList<>();
+        Node<Task> current = head;
+        while (current != null) {
+            history.add(current.data);
+            current = current.next;
+        }
+        return history;
     }
 
-    final void linkedLast(Task task) {
-        final Node<Task> newNode;
-        final Node<Task> oldTail = tail;
-        newNode = new Node<>(oldTail, task, null);
-        tail = newNode;
-        if (oldTail == null) {
-            head = newNode;
+    @Override
+    public void remove(int id) {
+        Node<Task> node = nodeMap.remove(id);
+        if (node == null) return;
+
+        Node<Task> prev = node.prev;
+        Node<Task> next = node.next;
+
+        if (prev != null) {
+            prev.next = next;
         } else {
-            oldTail.next = newNode;
-        }
-        size++;
-        historyMap.put(task.getId(), newNode);
-    }
-
-    private <T extends Task> List<T> getTasks() {
-        List<T> listOfTasks = new ArrayList<>();
-        Node<T> node = (Node<T>) head;
-        while (node != null) {
-            listOfTasks.add(node.task);
-            node = node.next;
-        }
-        return listOfTasks;
-    }
-
-    private void removeNode(Node node) {
-        if (node == null) {
-            return;
+            head = next;
         }
 
-        Node<Task> prevNode = node.prev;
-        Node<Task> nextNode = node.next;
-        if (size == 1) {
-            head = null;
-            tail = null;
-        } else if (size > 1) {
-            if (prevNode == null) {
-                head = nextNode;
-                nextNode.prev = null;
-            } else if (nextNode == null) {
-                tail = prevNode;
-                prevNode.next = null;
-            } else {
-                prevNode.next = nextNode;
-                nextNode.prev = prevNode;
-            }
-        }
-        if (size != 0) {
-            size--;
+        if (next != null) {
+            next.prev = prev;
+        } else {
+            tail = prev;
         }
     }
 }
