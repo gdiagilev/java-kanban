@@ -9,7 +9,6 @@ import ru.yandex.tracker.Service.TaskManager;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
-import java.util.List;
 
 public class SubtaskHandler extends BaseHttpHandler implements HttpHandler {
 
