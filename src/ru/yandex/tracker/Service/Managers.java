@@ -4,7 +4,7 @@ import java.io.File;
 
 public class Managers {
 
-    public TaskManager getDefault() {
+    public static TaskManager getDefault() {
         return new FileBackedTaskManager(new File("./resources/kanban.csv"));
     }
 
