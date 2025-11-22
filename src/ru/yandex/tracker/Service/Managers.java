@@ -1,11 +1,13 @@
 package ru.yandex.tracker.Service;
 
-import java.io.File;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 public class Managers {
 
     public static TaskManager getDefault() {
-        return new FileBackedTaskManager(new File("./resources/kanban.csv"));
+        Path path = Paths.get("./resources/kanban.csv");
+        return new FileBackedTaskManager(path);
     }
 
     public static HistoryManager getDefaultHistory() {
