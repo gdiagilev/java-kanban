@@ -18,20 +18,19 @@ public class Task {
         this.status = status;
     }
 
-    public Task(String name, String description, Status status, LocalDateTime startTime, Duration duration) {
-        this.name = name;
-        this.description = description;
-        this.status = status;
+    public Task(String name, String description, int id, Status status, LocalDateTime startTime, Duration duration) {
+        this(name, description, status);
+        this.id = id;
         this.startTime = startTime;
         this.duration = duration;
     }
 
-    public Task(String name, String description, int id, Status status, LocalDateTime startTime, Duration duration) {
-        this(name, description, status, startTime, duration);
-        this.id = id;
+    public Task(String name, String description, Status status, LocalDateTime startTime, Duration duration) {
+        this(name, description, status);
+        this.startTime = startTime;
+        this.duration = duration;
     }
 
-    // Геттеры и сеттеры
     public int getId() {
         return id;
     }
@@ -81,8 +80,8 @@ public class Task {
     }
 
     public LocalDateTime getEndTime() {
-        if (startTime != null && duration != null) return startTime.plus(duration);
-        return null;
+        if (startTime == null || duration == null) return null;
+        return startTime.plus(duration);
     }
 
     public TaskType getTaskType() {
@@ -94,8 +93,8 @@ public class Task {
         return "Task{" +
                 "id=" + id +
                 ", name='" + name + '\'' +
-                ", status=" + status +
                 ", description='" + description + '\'' +
+                ", status=" + status +
                 ", startTime=" + startTime +
                 ", duration=" + duration +
                 ", endTime=" + getEndTime() +

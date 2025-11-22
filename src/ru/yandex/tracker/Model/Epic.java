@@ -4,7 +4,6 @@ import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 
 public class Epic extends Task {
 
@@ -66,20 +65,24 @@ public class Epic extends Task {
             return;
         }
 
-        LocalDateTime start = subtasks.stream()
-                .map(Task::getStartTime)
-                .filter(Objects::nonNull)
-                .min(LocalDateTime::compareTo)
-                .orElse(null);
+        LocalDateTime start = null;
+        LocalDateTime end = null;
+        Duration totalDuration = Duration.ZERO;
 
-        LocalDateTime end = subtasks.stream()
-                .map(Task::getEndTime)
-                .filter(Objects::nonNull)
-                .max(LocalDateTime::compareTo)
-                .orElse(null);
+        for (Subtask s : subtasks) {
+            if (s.getStartTime() != null && s.getDuration() != null) {
+                LocalDateTime subStart = s.getStartTime();
+                LocalDateTime subEnd = subStart.plus(s.getDuration());
+
+                if (start == null || subStart.isBefore(start)) start = subStart;
+                if (end == null || subEnd.isAfter(end)) end = subEnd;
+
+                totalDuration = totalDuration.plus(s.getDuration());
+            }
+        }
 
         setStartTime(start);
-        setDuration(start != null && end != null ? Duration.between(start, end) : null);
+        setDuration(totalDuration);
     }
 
     @Override
