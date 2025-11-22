@@ -21,12 +21,4 @@ public class Subtask extends Task {
     public TaskType getTaskType() {
         return TaskType.SUBTASK;
     }
-
-    public void setName(String name) {
-        super.setName(name);
-    }
-
-    public void setDescription(String description) {
-        super.setDescription(description);
-    }
 }
