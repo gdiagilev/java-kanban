@@ -18,7 +18,7 @@ class InMemoryHistoryManagerTest {
 
     @BeforeEach
     void setUp() {
-        historyManager = Managers.getDefaultHistory();
+        historyManager = Managers.getDefault().getHistoryManager();
 
         task1 = new Task("Task 1", "Description 1", Status.NEW,
                 LocalDateTime.now(), Duration.ofMinutes(15));

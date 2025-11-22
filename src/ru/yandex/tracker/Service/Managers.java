@@ -5,21 +5,27 @@ import java.nio.file.Paths;
 
 public class Managers {
 
-    public static FileBackedTasksManager getFileBackedManager(Path file) {
+    private Managers() {
+    }
+
+
+    public static TaskManager getDefault() {
+        return new InMemoryTaskManager();
+    }
+
+
+    public static FileBackedTasksManager getFileBacked(Path file) {
         return new FileBackedTasksManager(file);
     }
 
-    public static FileBackedTasksManager getDefault() {
+
+    public static FileBackedTasksManager getFileBacked() {
         Path defaultPath = Paths.get("tasks.csv");
-        return getFileBackedManager(defaultPath);
+        return new FileBackedTasksManager(defaultPath);
     }
 
-    public static InMemoryHistoryManager getDefaultHistory() {
+
+    public static HistoryManager getDefaultHistory() {
         return new InMemoryHistoryManager();
-    }
-
-
-    public static InMemoryTaskManager getInMemoryManager() {
-        return new InMemoryTaskManager();
     }
 }

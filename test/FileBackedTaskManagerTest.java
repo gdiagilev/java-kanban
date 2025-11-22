@@ -1,12 +1,12 @@
-import ru.yandex.tracker.Service.FileBackedTaskManager;
+import ru.yandex.tracker.Service.FileBackedTasksManager;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
-public class FileBackedTaskManagerTest extends TaskManagerTest<FileBackedTaskManager> {
+public class FileBackedTaskManagerTest extends TaskManagerTest<FileBackedTasksManager> {
 
     @Override
-    protected FileBackedTaskManager createManager() {
+    protected FileBackedTasksManager createManager() {
         Path path = Paths.get("test_data.csv");
-        return new FileBackedTaskManager(path);
+        return new FileBackedTasksManager(path);
     }
 }
