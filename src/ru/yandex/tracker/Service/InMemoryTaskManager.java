@@ -90,7 +90,8 @@ public class InMemoryTaskManager implements TaskManager {
 
     @Override
     public void deleteSubtask(Subtask subtask) throws NotFoundException {
-        if (subtask == null || !subtasks.containsKey(subtask.getId())) throw new NotFoundException("Подзадача не найдена");
+        if (subtask == null || !subtasks.containsKey(subtask.getId()))
+            throw new NotFoundException("Подзадача не найдена");
         subtasks.remove(subtask.getId());
         Epic epic = epicTasks.get(subtask.getEpicId());
         if (epic != null) {
@@ -234,24 +235,20 @@ public class InMemoryTaskManager implements TaskManager {
         if (newTask.getStartTime() == null || newTask.getDuration() == null) return;
 
         LocalDateTime newStart = newTask.getStartTime();
-        LocalDateTime newEnd = newStart.plus(newTask.getDuration());
+        LocalDateTime newEnd = newTask.getEndTime();
 
-        List<Task> tasksToCheck = new ArrayList<>();
-        tasksToCheck.addAll(tasks.values());
-        tasksToCheck.addAll(subtasks.values());
-
-        for (Task task : tasksToCheck) {
-            if (task.getId() == newTask.getId()) continue;
+        for (Task task : getAllTasks()) {
+            if (task.getId() == newTask.getId() && task.getId() != 0) continue;
             if (task.getStartTime() == null || task.getDuration() == null) continue;
 
             LocalDateTime start = task.getStartTime();
-            LocalDateTime end = start.plus(task.getDuration());
+            LocalDateTime end = task.getEndTime();
 
             if (!newEnd.isBefore(start) && !newStart.isAfter(end)) {
                 throw new IllegalArgumentException(
-                        "Задачи пересекаются по времени: " + newTask.getName() + " и " + task.getName()
-                );
+                        "Задачи пересекаются по времени: " + newTask.getName() + " и " + task.getName());
             }
         }
     }
+
 }
