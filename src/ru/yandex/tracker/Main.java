@@ -13,10 +13,12 @@ public class Main {
         InMemoryTaskManager manager = new InMemoryTaskManager();
 
         // Обычные задачи
+        LocalDateTime now = LocalDateTime.now();
         Task task1 = new Task("Задача 1", "Описание задачи 1", Status.NEW,
-                LocalDateTime.now(), Duration.ofMinutes(30));
+                now, Duration.ofMinutes(30));
         Task task2 = new Task("Задача 2", "Описание задачи 2", Status.NEW,
-                LocalDateTime.now().plusHours(1), Duration.ofMinutes(45));
+                task1.getEndTime().plusMinutes(5), Duration.ofMinutes(45));
+
         manager.createTask(task1);
         manager.createTask(task2);
 
@@ -28,7 +30,7 @@ public class Main {
 
         // Подзадачи без пересечения
         Subtask sub1 = new Subtask(epic1.getId(), "Подзадача 1", "Подзадача 1 эпика 1",
-                Status.NEW, LocalDateTime.now().plusMinutes(10), Duration.ofMinutes(20));
+                Status.NEW, task2.getEndTime().plusMinutes(5), Duration.ofMinutes(20));
         Subtask sub2 = new Subtask(epic1.getId(), "Подзадача 2", "Подзадача 2 эпика 1",
                 Status.NEW, sub1.getEndTime().plusMinutes(5), Duration.ofMinutes(30));
         Subtask sub3 = new Subtask(epic2.getId(), "Подзадача 1", "Подзадача 1 эпика 2",
