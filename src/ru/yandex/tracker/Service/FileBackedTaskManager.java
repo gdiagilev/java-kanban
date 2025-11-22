@@ -10,7 +10,7 @@ import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.*;
 
-public class FileBackedTaskManager extends InMemoryTaskManager {
+public abstract class FileBackedTaskManager extends InMemoryTaskManager {
 
     private final Path file;
 
@@ -24,7 +24,6 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
     private void save() {
         try (BufferedWriter writer = Files.newBufferedWriter(file)) {
             writer.write("id,type,name,status,description,startTime,duration,epic\n");
-
             for (Task t : getAllTasks()) {
                 writer.write(toString(t) + "\n");
             }
@@ -44,7 +43,6 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
                 if (i != historyList.size() - 1) historyLine.append(",");
             }
             writer.write(historyLine.toString());
-
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -86,7 +84,6 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
                     if (task instanceof Epic) tempEpics.put(task.getId(), (Epic) task);
                     else if (task instanceof Subtask) tempSubtasks.put(task.getId(), (Subtask) task);
                     else tempTasks.put(task.getId(), task);
-
                     generatorId = Math.max(generatorId, task.getId() + 1);
                 } else {
                     String[] ids = line.split(",");
@@ -126,12 +123,16 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
 
         switch (type) {
             case TASK:
-                return new Task(name, desc, id, status, start, dur);
+                Task task = new Task(name, desc, status, start, dur);
+                task.setId(id);
+                return task;
             case EPIC:
                 return new Epic(name, desc, id, status);
             case SUBTASK:
                 int epicId = Integer.parseInt(parts[7]);
-                return new Subtask(epicId, name, desc, status, start, dur);
+                Subtask subtask = new Subtask(epicId, name, desc, status, start, dur);
+                subtask.setId(id);
+                return subtask;
             default:
                 throw new IllegalArgumentException("Unknown type");
         }
