@@ -15,8 +15,9 @@ public abstract class FileBackedTaskManager extends InMemoryTaskManager {
     private final Path file;
 
     public FileBackedTaskManager(Path file) {
+        super();
         this.file = file;
-        if (Files.exists(file)) {
+        if (java.nio.file.Files.exists(file)) {
             loadFromFile();
         }
     }

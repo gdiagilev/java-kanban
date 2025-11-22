@@ -2,6 +2,7 @@ package ru.yandex.tracker.Service;
 
 import ru.yandex.tracker.Model.*;
 import ru.yandex.tracker.Exceptions.NotFoundException;
+
 import java.util.List;
 
 public interface TaskManager {
@@ -12,19 +13,33 @@ public interface TaskManager {
 
     Subtask getSubtask(int id) throws NotFoundException;
 
+    List<Task> getAllTasks();
+
+    List<Epic> getAllEpicTasks();
+
+    List<Subtask> getAllSubtasks();
+
+    List<Task> getHistory();
+
+    List<Task> getPrioritizedTasks();
+
     void createTask(Task task);
 
     void createEpicTask(Epic epicTask);
 
     void createSubtask(Subtask subtask);
 
-    List<Subtask> getAllSubTasksByEpicId(int epicId) throws NotFoundException;
+    void updateTask(Task task) throws NotFoundException;
+
+    void updateEpicTask(Epic epicTask) throws NotFoundException;
+
+    void updateSubtask(Subtask subtask) throws NotFoundException;
 
     void deleteTask(Task task) throws NotFoundException;
 
     void deleteEpicTask(Epic epicTask) throws NotFoundException;
 
-    void deleteSubtask(Subtask subTask) throws NotFoundException;
+    void deleteSubtask(Subtask subtask) throws NotFoundException;
 
     void deleteTask(int id) throws NotFoundException;
 
@@ -38,19 +53,5 @@ public interface TaskManager {
 
     void deleteAllSubtasks();
 
-    void updateTask(Task task) throws NotFoundException;
-
-    void updateEpicTask(Epic epicTask) throws NotFoundException;
-
-    void updateSubtask(Subtask subTask) throws NotFoundException;
-
-    List<Task> getAllTasks();
-
-    List<Epic> getAllEpicTasks();
-
-    List<Subtask> getAllSubtasks();
-
-    List<Task> getHistory();
-
-    List<Task> getPrioritizedTasks();
+    List<Subtask> getAllSubTasksByEpicId(int epicId) throws NotFoundException;
 }

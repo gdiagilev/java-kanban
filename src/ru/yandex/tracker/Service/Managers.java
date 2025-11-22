@@ -5,12 +5,17 @@ import java.nio.file.Paths;
 
 public class Managers {
 
-    public static TaskManager getDefault() {
-        Path path = Paths.get("./resources/kanban.csv");
-        return new FileBackedTaskManager(path);
+    public static FileBackedTasksManager getFileBackedManager(Path file) {
+        return new FileBackedTasksManager(file) {
+        };
     }
 
-    public static HistoryManager getDefaultHistory() {
-        return new InMemoryHistoryManager();
+    public static FileBackedTasksManager getDefault() {
+        Path defaultPath = Paths.get("tasks.csv"); // стандартный файл
+        return getFileBackedManager(defaultPath);
+    }
+
+    public static InMemoryTaskManager getInMemoryManager() {
+        return new InMemoryTaskManager();
     }
 }
