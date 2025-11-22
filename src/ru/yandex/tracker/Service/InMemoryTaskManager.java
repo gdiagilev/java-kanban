@@ -60,7 +60,7 @@ public class InMemoryTaskManager implements TaskManager {
     }
 
     @Override
-    public void createSubtask(Subtask subtask) throws NotFoundException {
+    public void createSubtask(Subtask subtask) {
         checkTimeIntersection(subtask);
         Epic epic = epicTasks.get(subtask.getEpicId());
         if (epic == null) throw new NotFoundException("Эпик не найден");
@@ -94,7 +94,7 @@ public class InMemoryTaskManager implements TaskManager {
         subtasks.remove(subtask.getId());
         Epic epic = epicTasks.get(subtask.getEpicId());
         if (epic != null) {
-            epic.removeSubtaskById(subtask.getId());
+            epic.getSubtasks().remove(subtask);
             updateEpicStatusAndTime(epic);
         }
         history.remove(subtask.getId());
@@ -186,7 +186,6 @@ public class InMemoryTaskManager implements TaskManager {
         List<Task> allTasks = new ArrayList<>();
         allTasks.addAll(tasks.values());
         allTasks.addAll(subtasks.values());
-        allTasks.addAll(epicTasks.values());
         allTasks.sort(Comparator.comparing(Task::getStartTime, Comparator.nullsLast(Comparator.naturalOrder())));
         return allTasks;
     }
@@ -204,7 +203,6 @@ public class InMemoryTaskManager implements TaskManager {
         boolean allDone = true;
         LocalDateTime start = null;
         LocalDateTime end = null;
-        Duration totalDuration = Duration.ZERO;
 
         for (Subtask sub : subs) {
             if (sub.getStatus() != Status.NEW) allNew = false;
@@ -216,8 +214,6 @@ public class InMemoryTaskManager implements TaskManager {
 
                 if (start == null || subStart.isBefore(start)) start = subStart;
                 if (end == null || subEnd.isAfter(end)) end = subEnd;
-
-                totalDuration = totalDuration.plus(sub.getDuration());
             }
         }
 
@@ -227,7 +223,7 @@ public class InMemoryTaskManager implements TaskManager {
 
         if (start != null && end != null) {
             epic.setStartTime(start);
-            epic.setDuration(totalDuration);
+            epic.setDuration(Duration.between(start, end));
         } else {
             epic.setStartTime(null);
             epic.setDuration(null);
@@ -240,7 +236,11 @@ public class InMemoryTaskManager implements TaskManager {
         LocalDateTime newStart = newTask.getStartTime();
         LocalDateTime newEnd = newStart.plus(newTask.getDuration());
 
-        for (Task task : getAllTasks()) {
+        List<Task> tasksToCheck = new ArrayList<>();
+        tasksToCheck.addAll(tasks.values());
+        tasksToCheck.addAll(subtasks.values());
+
+        for (Task task : tasksToCheck) {
             if (task.getId() == newTask.getId()) continue;
             if (task.getStartTime() == null || task.getDuration() == null) continue;
 
@@ -248,7 +248,9 @@ public class InMemoryTaskManager implements TaskManager {
             LocalDateTime end = start.plus(task.getDuration());
 
             if (!newEnd.isBefore(start) && !newStart.isAfter(end)) {
-                throw new IllegalArgumentException("Задачи пересекаются по времени");
+                throw new IllegalArgumentException(
+                        "Задачи пересекаются по времени: " + newTask.getName() + " и " + task.getName()
+                );
             }
         }
     }
