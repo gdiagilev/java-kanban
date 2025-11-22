@@ -1,3 +1,5 @@
+package ru.yandex.tracker;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import ru.yandex.tracker.Model.*;
@@ -17,71 +19,78 @@ class EpicTaskTest {
     }
 
     @Test
-    void shouldSetStatusNewWhenAllSubtasksNew() {
-        Subtask s1 = new Subtask(epic.getId(), "S1", "Desc", Status.NEW);
-        Subtask s2 = new Subtask(epic.getId(), "S2", "Desc", Status.NEW);
+    void shouldBeNewIfAllSubtasksNew() {
+        Subtask s1 = new Subtask(epic.getId(), "S1", "Desc", Status.NEW,
+                LocalDateTime.now(), Duration.ofMinutes(30));
+        Subtask s2 = new Subtask(epic.getId(), "S2", "Desc", Status.NEW,
+                LocalDateTime.now().plusHours(1), Duration.ofMinutes(45));
+
         epic.addSubtask(s1);
         epic.addSubtask(s2);
 
-        epic.updateEpicStatus();
-        assertEquals(Status.NEW, epic.getStatus(), "Если все подзадачи NEW — эпик тоже NEW");
+        epic.updateStatus();
+
+        assertEquals(Status.NEW, epic.getStatus(), "Эпик должен быть NEW если все подзадачи NEW");
     }
 
     @Test
-    void shouldSetStatusDoneWhenAllSubtasksDone() {
-        Subtask s1 = new Subtask(epic.getId(), "S1", "Desc", Status.DONE);
-        Subtask s2 = new Subtask(epic.getId(), "S2", "Desc", Status.DONE);
+    void shouldBeDoneIfAllSubtasksDone() {
+        Subtask s1 = new Subtask(epic.getId(), "S1", "Desc", Status.DONE,
+                LocalDateTime.now(), Duration.ofMinutes(30));
+        Subtask s2 = new Subtask(epic.getId(), "S2", "Desc", Status.DONE,
+                LocalDateTime.now().plusHours(1), Duration.ofMinutes(45));
+
         epic.addSubtask(s1);
         epic.addSubtask(s2);
 
-        epic.updateEpicStatus();
-        assertEquals(Status.DONE, epic.getStatus(), "Если все подзадачи DONE — эпик DONE");
+        epic.updateStatus();
+
+        assertEquals(Status.DONE, epic.getStatus(), "Эпик должен быть DONE если все подзадачи DONE");
     }
 
     @Test
-    void shouldSetStatusInProgressWhenMixedNewAndDone() {
-        Subtask s1 = new Subtask(epic.getId(), "S1", "Desc", Status.NEW);
-        Subtask s2 = new Subtask(epic.getId(), "S2", "Desc", Status.DONE);
+    void shouldBeInProgressIfMixedNewAndDone() {
+        Subtask s1 = new Subtask(epic.getId(), "S1", "Desc", Status.NEW,
+                LocalDateTime.now(), Duration.ofMinutes(30));
+        Subtask s2 = new Subtask(epic.getId(), "S2", "Desc", Status.DONE,
+                LocalDateTime.now().plusHours(1), Duration.ofMinutes(45));
+
         epic.addSubtask(s1);
         epic.addSubtask(s2);
 
-        epic.updateEpicStatus();
-        assertEquals(Status.IN_PROGRESS, epic.getStatus(), "Если подзадачи NEW и DONE — эпик IN_PROGRESS");
+        epic.updateStatus();
+
+        assertEquals(Status.IN_PROGRESS, epic.getStatus(), "Эпик должен быть IN_PROGRESS если подзадачи NEW и DONE");
     }
 
     @Test
-    void shouldSetStatusInProgressWhenAnySubtaskInProgress() {
-        Subtask s1 = new Subtask(epic.getId(), "S1", "Desc", Status.IN_PROGRESS);
-        Subtask s2 = new Subtask(epic.getId(), "S2", "Desc", Status.NEW);
+    void shouldBeInProgressIfAnySubtaskInProgress() {
+        Subtask s1 = new Subtask(epic.getId(), "S1", "Desc", Status.IN_PROGRESS,
+                LocalDateTime.now(), Duration.ofMinutes(30));
+        Subtask s2 = new Subtask(epic.getId(), "S2", "Desc", Status.NEW,
+                LocalDateTime.now().plusHours(1), Duration.ofMinutes(45));
+
         epic.addSubtask(s1);
         epic.addSubtask(s2);
 
-        epic.updateEpicStatus();
-        assertEquals(Status.IN_PROGRESS, epic.getStatus(), "Если хотя бы одна подзадача IN_PROGRESS — эпик IN_PROGRESS");
+        epic.updateStatus();
+
+        assertEquals(Status.IN_PROGRESS, epic.getStatus(), "Эпик должен быть IN_PROGRESS если хотя бы одна подзадача IN_PROGRESS");
     }
 
     @Test
-    void shouldCalculateStartEndAndDurationCorrectly() {
+    void shouldCalculateStartEndAndDuration() {
         LocalDateTime now = LocalDateTime.now();
-        Subtask s1 = new Subtask(epic.getId(), "S1", "Desc", Status.NEW);
-        s1.setStartTime(now);
-        s1.setDuration(Duration.ofMinutes(30));
-
-        Subtask s2 = new Subtask(epic.getId(), "S2", "Desc", Status.NEW);
-        s2.setStartTime(now.plusHours(1));
-        s2.setDuration(Duration.ofHours(2));
+        Subtask s1 = new Subtask(epic.getId(), "S1", "Desc", Status.NEW, now, Duration.ofMinutes(30));
+        Subtask s2 = new Subtask(epic.getId(), "S2", "Desc", Status.NEW, now.plusHours(1), Duration.ofHours(2));
 
         epic.addSubtask(s1);
         epic.addSubtask(s2);
+
         epic.updateEpicTime();
 
         assertEquals(now, epic.getStartTime(), "Время начала эпика — самое раннее из подзадач");
-
-        LocalDateTime expectedEnd = s2.getEndTime(); // последняя по времени подзадача
-        assertEquals(expectedEnd, epic.getEndTime(), "Время окончания эпика — самое позднее из подзадач");
-
-        Duration expectedDuration = s1.getDuration().plus(s2.getDuration());
-        assertTrue(expectedDuration.equals(epic.getDuration()),
-                "Продолжительность эпика должна быть суммой подзадач");
+        assertEquals(s2.getEndTime(), epic.getEndTime(), "Время окончания эпика — самое позднее из подзадач");
+        assertEquals(s1.getDuration().plus(s2.getDuration()), epic.getDuration(), "Продолжительность эпика — сумма длительностей подзадач");
     }
 }

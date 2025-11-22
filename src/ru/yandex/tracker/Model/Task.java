@@ -4,32 +4,58 @@ import java.time.Duration;
 import java.time.LocalDateTime;
 
 public class Task {
-    protected int id;
-    protected String name;
-    protected String description;
-    protected Status status;
-    protected Duration duration;
+
+    private static int idGenerator = 1;
+
+    private int id;
+    private String name;
+    private String description;
+    private Status status;
+
     protected LocalDateTime startTime;
+    protected Duration duration;
+    protected LocalDateTime endTime;
 
     public Task(String name, String description, Status status) {
+        this.id = idGenerator++;
         this.name = name;
         this.description = description;
         this.status = status;
     }
 
-    public Task(String name, String description, int id, Status status) {
+    public Task(String name, String description, Status status,
+                LocalDateTime startTime, Duration duration) {
+
+        this(name, description, status);
+        this.startTime = startTime;
+        this.duration = duration;
+
+        updateEndTime();
+    }
+
+    public Task(String name, String description, int id, Status status,
+                LocalDateTime startTime, Duration duration) {
+
+        this.name = name;
+        this.description = description;
         this.id = id;
-        this.name = name;
-        this.description = description;
-        this.status = status;
-    }
-
-    public Task(String name, String description, Status status, LocalDateTime startTime, Duration duration) {
-        this.name = name;
-        this.description = description;
         this.status = status;
         this.startTime = startTime;
         this.duration = duration;
+
+        if (id >= idGenerator) {
+            idGenerator = id + 1;
+        }
+
+        updateEndTime();
+    }
+
+    private void updateEndTime() {
+        if (startTime == null || duration == null) {
+            endTime = null;
+        } else {
+            endTime = startTime.plus(duration);
+        }
     }
 
     public int getId() {
@@ -37,6 +63,9 @@ public class Task {
     }
 
     public void setId(int id) {
+        if (id >= idGenerator) {
+            idGenerator = id + 1;
+        }
         this.id = id;
     }
 
@@ -64,27 +93,30 @@ public class Task {
         this.status = status;
     }
 
-    public Duration getDuration() {
-        return duration;
-    }
-
-    public void setDuration(Duration duration) {
-        this.duration = duration;
-    }
-
     public LocalDateTime getStartTime() {
         return startTime;
     }
 
     public void setStartTime(LocalDateTime startTime) {
         this.startTime = startTime;
+        updateEndTime();
+    }
+
+    public Duration getDuration() {
+        return duration;
+    }
+
+    public void setDuration(Duration duration) {
+        this.duration = duration;
+        updateEndTime();
     }
 
     public LocalDateTime getEndTime() {
-        if (startTime == null || duration == null) {
-            return null;
-        }
-        return startTime.plus(duration);
+        return endTime;
+    }
+
+    protected void setEndTime(LocalDateTime endTime) {
+        this.endTime = endTime;
     }
 
     public TaskType getTaskType() {
@@ -100,7 +132,7 @@ public class Task {
                 ", description='" + description + '\'' +
                 ", startTime=" + startTime +
                 ", duration=" + duration +
-                ", endTime=" + getEndTime() +
+                ", endTime=" + endTime +
                 '}';
     }
 }

@@ -3,10 +3,9 @@ package ru.yandex.tracker.HttpServer;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import org.junit.jupiter.api.*;
-import ru.yandex.tracker.Model.Task;
 import ru.yandex.tracker.Model.Status;
+import ru.yandex.tracker.Model.Task;
 import ru.yandex.tracker.Service.InMemoryTaskManager;
-import ru.yandex.tracker.Service.TaskManager;
 
 import java.io.IOException;
 import java.net.URI;
@@ -19,23 +18,30 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class HttpTaskServerTasksTest {
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
+public class HttpTaskServerTasksTest {
 
     private HttpTaskServer server;
-    private TaskManager manager;
+    private InMemoryTaskManager manager; // конкретный класс
     private Gson gson;
-    private HttpClient client;
-    private final String baseUrl = "http://localhost:8080/tasks";
+
+    @BeforeAll
+    void init() throws IOException {
+        manager = new InMemoryTaskManager();
+        gson = new GsonBuilder()
+                .registerTypeAdapter(LocalDateTime.class, new ru.yandex.tracker.HttpServer.LocalDateTimeAdapter())
+                .registerTypeAdapter(Duration.class, new ru.yandex.tracker.HttpServer.DurationAdapter())
+                .serializeNulls()
+                .create();
+        server = new HttpTaskServer(manager, gson);
+    }
 
     @BeforeEach
-    void setUp() throws IOException {
-        manager = new InMemoryTaskManager();
-        gson = new GsonBuilder().serializeNulls().create();
-
-        server = new HttpTaskServer(8080, manager, gson);
+    void setUp() {
+        manager.getAllTasks().forEach(t -> manager.deleteTask(t.getId()));
+        manager.getAllEpicTasks().forEach(e -> manager.deleteEpicTask(e.getId()));
+        manager.getAllSubtasks().forEach(s -> manager.deleteSubtask(s.getId()));
         server.start();
-
-        client = HttpClient.newHttpClient();
     }
 
     @AfterEach
@@ -44,43 +50,49 @@ class HttpTaskServerTasksTest {
     }
 
     @Test
-    void testCreateGetAndDeleteTask() throws IOException, InterruptedException {
-        // Создаем задачу
-        Task task = new Task("Test Task", "Test Description", Status.NEW);
-        task.setDuration(Duration.ofMinutes(30));
-        task.setStartTime(LocalDateTime.now());
-        String jsonTask = gson.toJson(task);
+    void testCreateTask() throws IOException, InterruptedException {
+        Task task = new Task("Task 1", "Desc", Status.NEW, LocalDateTime.now(), Duration.ofMinutes(30));
+        String json = gson.toJson(task);
 
-        // POST /tasks
-        HttpRequest postRequest = HttpRequest.newBuilder()
-                .uri(URI.create(baseUrl))
-                .POST(HttpRequest.BodyPublishers.ofString(jsonTask))
-                .header("Content-Type", "application/json")
-                .build();
-        HttpResponse<String> postResponse = client.send(postRequest, HttpResponse.BodyHandlers.ofString());
-        assertEquals(201, postResponse.statusCode(), "Создание задачи должно вернуть 201");
+        HttpClient client = HttpClient.newHttpClient();
+        URI url = URI.create("http://localhost:8080/tasks");
+        HttpRequest request = HttpRequest.newBuilder().uri(url).POST(HttpRequest.BodyPublishers.ofString(json)).build();
 
-        // GET /tasks?id=1
-        HttpRequest getRequest = HttpRequest.newBuilder()
-                .uri(URI.create(baseUrl + "?id=1"))
-                .GET()
-                .build();
-        HttpResponse<String> getResponse = client.send(getRequest, HttpResponse.BodyHandlers.ofString());
-        assertEquals(200, getResponse.statusCode(), "Получение задачи должно вернуть 200");
+        HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+        assertEquals(201, response.statusCode());
 
-        Task returnedTask = gson.fromJson(getResponse.body(), Task.class);
-        assertNotNull(returnedTask, "Возвращенная задача не должна быть null");
-        assertEquals("Test Task", returnedTask.getName(), "Имя задачи не совпадает");
+        List<Task> tasks = manager.getAllTasks();
+        assertEquals(1, tasks.size());
+        assertEquals("Task 1", tasks.get(0).getName());
+    }
 
-        // DELETE /tasks
-        HttpRequest deleteRequest = HttpRequest.newBuilder()
-                .uri(URI.create(baseUrl))
-                .DELETE()
-                .build();
-        HttpResponse<String> deleteResponse = client.send(deleteRequest, HttpResponse.BodyHandlers.ofString());
-        assertEquals(200, deleteResponse.statusCode(), "Удаление всех задач должно вернуть 200");
+    @Test
+    void testGetTaskById() throws IOException, InterruptedException {
+        Task task = new Task("Task 1", "Desc", Status.NEW, LocalDateTime.now(), Duration.ofMinutes(30));
+        manager.createTask(task);
 
-        List<Task> tasksAfterDelete = manager.getAllTasks();
-        assertTrue(tasksAfterDelete.isEmpty(), "Список задач должен быть пуст после удаления");
+        HttpClient client = HttpClient.newHttpClient();
+        URI url = URI.create("http://localhost:8080/tasks?id=" + task.getId());
+        HttpRequest request = HttpRequest.newBuilder().uri(url).GET().build();
+
+        HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+        assertEquals(200, response.statusCode());
+
+        Task t = gson.fromJson(response.body(), Task.class);
+        assertEquals(task.getName(), t.getName());
+    }
+
+    @Test
+    void testDeleteTask() throws IOException, InterruptedException {
+        Task task = new Task("Task 1", "Desc", Status.NEW, LocalDateTime.now(), Duration.ofMinutes(30));
+        manager.createTask(task);
+
+        HttpClient client = HttpClient.newHttpClient();
+        URI url = URI.create("http://localhost:8080/tasks?id=" + task.getId());
+        HttpRequest request = HttpRequest.newBuilder().uri(url).DELETE().build();
+
+        HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+        assertEquals(200, response.statusCode());
+        assertTrue(manager.getAllTasks().isEmpty());
     }
 }

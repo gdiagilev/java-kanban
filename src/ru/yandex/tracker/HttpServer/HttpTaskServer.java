@@ -2,7 +2,6 @@ package ru.yandex.tracker.HttpServer;
 
 import com.google.gson.*;
 import com.sun.net.httpserver.HttpServer;
-import ru.yandex.tracker.Service.Managers;
 import ru.yandex.tracker.Service.TaskManager;
 
 import java.io.IOException;
@@ -17,11 +16,11 @@ public class HttpTaskServer {
     private static final int PORT = 8080;
     private final HttpServer server;
     private final TaskManager manager;
-    private static Gson gson;
+    private final Gson gson;
 
-    public HttpTaskServer(int i, TaskManager manager, Gson gson) throws IOException {
+    public HttpTaskServer(TaskManager manager, Gson gson) throws IOException {
         this.manager = manager;
-        this.gson = createGson();
+        this.gson = gson;
 
         server = HttpServer.create(new InetSocketAddress(PORT), 0);
 
@@ -32,7 +31,11 @@ public class HttpTaskServer {
         server.createContext("/prioritized", new PrioritizedHandler(this.gson, manager));
     }
 
-    private Gson createGson() {
+    public HttpTaskServer(TaskManager manager) throws IOException {
+        this(manager, createDefaultGson());
+    }
+
+    public static Gson createDefaultGson() {
         GsonBuilder builder = new GsonBuilder().serializeNulls();
 
         builder.registerTypeAdapter(Duration.class, new JsonSerializer<Duration>() {
@@ -72,15 +75,16 @@ public class HttpTaskServer {
 
     public void stop(int delaySeconds) {
         server.stop(delaySeconds);
-    }
-
-    public static void main(String[] args) throws IOException {
-        TaskManager manager = Managers.getDefault();
-        HttpTaskServer server = new HttpTaskServer(8080, manager, gson);
-        server.start();
+        System.out.println("HTTP Task Server stopped");
     }
 
     public Gson getGson() {
         return gson;
+    }
+
+    public static void main(String[] args) throws IOException {
+        TaskManager manager = ru.yandex.tracker.Service.Managers.getDefault();
+        HttpTaskServer server = new HttpTaskServer(manager);
+        server.start();
     }
 }

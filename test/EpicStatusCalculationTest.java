@@ -21,14 +21,9 @@ public class EpicStatusCalculationTest {
 
     @Test
     void shouldReturnNewWhenAllSubtasksAreNew() {
-        Subtask sub1 = new Subtask(epic.getId(), "sub1", "desc1", Status.NEW);
-        Subtask sub2 = new Subtask(epic.getId(), "sub2", "desc2", Status.NEW);
-
-        sub1.setStartTime(LocalDateTime.now());
-        sub1.setDuration(Duration.ofMinutes(30));
-
-        sub2.setStartTime(LocalDateTime.now().plusHours(1));
-        sub2.setDuration(Duration.ofMinutes(45));
+        LocalDateTime now = LocalDateTime.now();
+        Subtask sub1 = new Subtask(epic.getId(), "sub1", "desc1", Status.NEW, now, Duration.ofMinutes(30));
+        Subtask sub2 = new Subtask(epic.getId(), "sub2", "desc2", Status.NEW, now.plusHours(1), Duration.ofMinutes(45));
 
         manager.createSubtask(sub1);
         manager.createSubtask(sub2);
@@ -39,14 +34,9 @@ public class EpicStatusCalculationTest {
 
     @Test
     void shouldReturnDoneWhenAllSubtasksAreDone() {
-        Subtask sub1 = new Subtask(epic.getId(), "sub1", "desc1", Status.DONE);
-        Subtask sub2 = new Subtask(epic.getId(), "sub2", "desc2", Status.DONE);
-
-        sub1.setStartTime(LocalDateTime.now());
-        sub1.setDuration(Duration.ofMinutes(30));
-
-        sub2.setStartTime(LocalDateTime.now().plusHours(1));
-        sub2.setDuration(Duration.ofMinutes(45));
+        LocalDateTime now = LocalDateTime.now();
+        Subtask sub1 = new Subtask(epic.getId(), "sub1", "desc1", Status.DONE, now, Duration.ofMinutes(30));
+        Subtask sub2 = new Subtask(epic.getId(), "sub2", "desc2", Status.DONE, now.plusHours(1), Duration.ofMinutes(45));
 
         manager.createSubtask(sub1);
         manager.createSubtask(sub2);
@@ -57,14 +47,9 @@ public class EpicStatusCalculationTest {
 
     @Test
     void shouldReturnInProgressWhenSubtasksHaveDifferentStatuses() {
-        Subtask sub1 = new Subtask(epic.getId(), "sub1", "desc1", Status.NEW);
-        Subtask sub2 = new Subtask(epic.getId(), "sub2", "desc2", Status.DONE);
-
-        sub1.setStartTime(LocalDateTime.now());
-        sub1.setDuration(Duration.ofMinutes(30));
-
-        sub2.setStartTime(LocalDateTime.now().plusHours(1));
-        sub2.setDuration(Duration.ofMinutes(45));
+        LocalDateTime now = LocalDateTime.now();
+        Subtask sub1 = new Subtask(epic.getId(), "sub1", "desc1", Status.NEW, now, Duration.ofMinutes(30));
+        Subtask sub2 = new Subtask(epic.getId(), "sub2", "desc2", Status.DONE, now.plusHours(1), Duration.ofMinutes(45));
 
         manager.createSubtask(sub1);
         manager.createSubtask(sub2);
@@ -75,14 +60,9 @@ public class EpicStatusCalculationTest {
 
     @Test
     void shouldReturnInProgressWhenSubtasksAreInProgress() {
-        Subtask sub1 = new Subtask(epic.getId(), "sub1", "desc1", Status.IN_PROGRESS);
-        Subtask sub2 = new Subtask(epic.getId(), "sub2", "desc2", Status.IN_PROGRESS);
-
-        sub1.setStartTime(LocalDateTime.now());
-        sub1.setDuration(Duration.ofMinutes(30));
-
-        sub2.setStartTime(LocalDateTime.now().plusHours(1));
-        sub2.setDuration(Duration.ofMinutes(45));
+        LocalDateTime now = LocalDateTime.now();
+        Subtask sub1 = new Subtask(epic.getId(), "sub1", "desc1", Status.IN_PROGRESS, now, Duration.ofMinutes(30));
+        Subtask sub2 = new Subtask(epic.getId(), "sub2", "desc2", Status.IN_PROGRESS, now.plusHours(1), Duration.ofMinutes(45));
 
         manager.createSubtask(sub1);
         manager.createSubtask(sub2);
