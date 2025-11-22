@@ -6,17 +6,14 @@ import com.sun.net.httpserver.HttpHandler;
 import ru.yandex.tracker.Model.Subtask;
 import ru.yandex.tracker.Service.TaskManager;
 
-
 import java.io.IOException;
-import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
 
 public class SubtaskHandler extends BaseHttpHandler implements HttpHandler {
 
     private final TaskManager manager;
     private final Gson gson;
 
-    public SubtaskHandler(TaskManager manager, Gson gson) {
+    public SubtaskHandler(Gson gson, TaskManager manager) {
         this.manager = manager;
         this.gson = gson;
     }
@@ -39,12 +36,12 @@ public class SubtaskHandler extends BaseHttpHandler implements HttpHandler {
             }
 
             if ("POST".equalsIgnoreCase(method)) {
-                String body = readBody(exchange.getRequestBody());
-                Subtask sub = gson.fromJson(body, Subtask.class);
+                Subtask sub = gson.fromJson(readBody(exchange), Subtask.class);
                 if (sub == null) {
-                    sendServerError(exchange, "{\"error\":\"Неверное тело\"}");
+                    sendServerError(exchange, "{\"error\":\"Invalid body\"}");
                     return;
                 }
+
                 if (sub.getId() == 0) {
                     if (manager.getEpicTask(sub.getEpicId()) == null) {
                         sendNotFound(exchange);
@@ -94,9 +91,5 @@ public class SubtaskHandler extends BaseHttpHandler implements HttpHandler {
         } catch (Exception ex) {
             sendServerError(exchange, "{\"error\":\"Internal Server Error\"}");
         }
-    }
-
-    private String readBody(InputStream is) throws IOException {
-        return new String(is.readAllBytes(), StandardCharsets.UTF_8);
     }
 }

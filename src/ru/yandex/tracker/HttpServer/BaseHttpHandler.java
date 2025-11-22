@@ -1,11 +1,11 @@
 package ru.yandex.tracker.HttpServer;
 
 import com.sun.net.httpserver.HttpExchange;
-
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 
 public class BaseHttpHandler {
+
     protected void sendText(HttpExchange h, String text) throws IOException {
         byte[] resp = text.getBytes(StandardCharsets.UTF_8);
         h.getResponseHeaders().add("Content-Type", "application/json;charset=utf-8");
@@ -32,7 +32,6 @@ public class BaseHttpHandler {
     }
 
     protected void sendHasInteractions(HttpExchange h, String message) throws IOException {
-        // 406 Not Acceptable — конфликт по времени
         byte[] resp = message == null ? new byte[0] : message.getBytes(StandardCharsets.UTF_8);
         h.getResponseHeaders().add("Content-Type", "application/json;charset=utf-8");
         h.sendResponseHeaders(406, resp.length);
@@ -50,7 +49,6 @@ public class BaseHttpHandler {
 
     protected Integer getIdFromQuery(String rawQuery) {
         if (rawQuery == null || rawQuery.isBlank()) return null;
-        // query format: id=123
         String[] parts = rawQuery.split("&");
         for (String p : parts) {
             String[] kv = p.split("=");
@@ -63,5 +61,9 @@ public class BaseHttpHandler {
             }
         }
         return null;
+    }
+
+    protected String readBody(HttpExchange exchange) throws IOException {
+        return new String(exchange.getRequestBody().readAllBytes(), StandardCharsets.UTF_8);
     }
 }

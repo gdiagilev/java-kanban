@@ -8,8 +8,6 @@ import ru.yandex.tracker.Model.Subtask;
 import ru.yandex.tracker.Service.TaskManager;
 
 import java.io.IOException;
-import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 public class EpicHandler extends BaseHttpHandler implements HttpHandler {
@@ -17,7 +15,7 @@ public class EpicHandler extends BaseHttpHandler implements HttpHandler {
     private final TaskManager manager;
     private final Gson gson;
 
-    public EpicHandler(TaskManager manager, Gson gson) {
+    public EpicHandler(Gson gson, TaskManager manager) {
         this.manager = manager;
         this.gson = gson;
     }
@@ -26,14 +24,14 @@ public class EpicHandler extends BaseHttpHandler implements HttpHandler {
     public void handle(HttpExchange exchange) throws IOException {
         try {
             String method = exchange.getRequestMethod();
-            String query = exchange.getRequestURI().getQuery();
             String path = exchange.getRequestURI().getPath();
+            String query = exchange.getRequestURI().getQuery();
 
             if ("GET".equalsIgnoreCase(method)) {
                 if (path.endsWith("/subtasks")) {
                     Integer id = getIdFromQuery(query);
                     if (id == null) {
-                        sendServerError(exchange, "{\"error\":\"Некорректный id\"}");
+                        sendServerError(exchange, "{\"error\":\"Invalid id\"}");
                         return;
                     }
                     List<Subtask> subs = manager.getAllSubTasksByEpicId(id);
@@ -53,12 +51,12 @@ public class EpicHandler extends BaseHttpHandler implements HttpHandler {
             }
 
             if ("POST".equalsIgnoreCase(method)) {
-                String body = readBody(exchange.getRequestBody());
-                Epic epic = gson.fromJson(body, Epic.class);
+                Epic epic = gson.fromJson(readBody(exchange), Epic.class);
                 if (epic == null) {
-                    sendServerError(exchange, "{\"error\":\"Неверное тело\"}");
+                    sendServerError(exchange, "{\"error\":\"Invalid body\"}");
                     return;
                 }
+
                 if (epic.getId() == 0) {
                     manager.createEpicTask(epic);
                     sendCreated(exchange, gson.toJson(epic));
@@ -79,8 +77,7 @@ public class EpicHandler extends BaseHttpHandler implements HttpHandler {
                     manager.deleteAllEpicTasks();
                     sendText(exchange, "{\"result\":\"all epics deleted\"}");
                 } else {
-                    Epic e = manager.getEpicTask(id);
-                    if (e == null) sendNotFound(exchange);
+                    if (manager.getEpicTask(id) == null) sendNotFound(exchange);
                     else {
                         manager.deleteEpicTask(id);
                         sendText(exchange, "{\"result\":\"deleted\"}");
@@ -97,9 +94,5 @@ public class EpicHandler extends BaseHttpHandler implements HttpHandler {
         } catch (Exception ex) {
             sendServerError(exchange, "{\"error\":\"Internal Server Error\"}");
         }
-    }
-
-    private String readBody(InputStream is) throws IOException {
-        return new String(is.readAllBytes(), StandardCharsets.UTF_8);
     }
 }

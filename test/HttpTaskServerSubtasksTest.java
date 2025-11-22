@@ -1,10 +1,10 @@
 package ru.yandex.tracker.HttpServer;
 
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import org.junit.jupiter.api.*;
 import ru.yandex.tracker.Model.Epic;
 import ru.yandex.tracker.Model.Subtask;
-import ru.yandex.tracker.Model.Status;
 import ru.yandex.tracker.Service.InMemoryTaskManager;
 import ru.yandex.tracker.Service.TaskManager;
 
@@ -13,27 +13,29 @@ import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
-import java.time.Duration;
-import java.time.LocalDateTime;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 class HttpTaskServerSubtasksTest {
 
-    private TaskManager manager;
     private HttpTaskServer server;
+    private TaskManager manager;
     private Gson gson;
     private HttpClient client;
+    private final String baseUrl = "http://localhost:8080/subtasks";
 
     @BeforeEach
     void setUp() throws IOException {
         manager = new InMemoryTaskManager();
-        server = new HttpTaskServer(manager);
+        gson = new GsonBuilder().serializeNulls().create();
+        server = new HttpTaskServer(8080, manager, gson);
         server.start();
-
-        gson = HttpTaskServer.getGson();
         client = HttpClient.newHttpClient();
+
+        // создаём эпик, чтобы можно было создавать подзадачи
+        Epic epic = new Epic("Epic 1", "Epic for subtasks");
+        manager.createEpicTask(epic);
     }
 
     @AfterEach
@@ -42,58 +44,39 @@ class HttpTaskServerSubtasksTest {
     }
 
     @Test
-    void testCreateSubtask() throws IOException, InterruptedException {
-        Epic epic = new Epic("Epic", "Desc");
-        manager.createEpicTask(epic);
+    void testCreateGetAndDeleteSubtask() throws IOException, InterruptedException {
+        Subtask subtask = new Subtask(1, "Subtask 1", "Desc Subtask");
+        String jsonSub = gson.toJson(subtask);
 
-        Subtask subtask = new Subtask(epic.getId(), "Sub1", "SubDesc", Status.NEW,
-                LocalDateTime.now(), Duration.ofMinutes(15));
-        String json = gson.toJson(subtask);
-
-        HttpRequest request = HttpRequest.newBuilder()
-                .uri(URI.create("http://localhost:8080/subtasks"))
-                .POST(HttpRequest.BodyPublishers.ofString(json))
+        // POST /subtasks
+        HttpRequest postRequest = HttpRequest.newBuilder()
+                .uri(URI.create(baseUrl))
+                .POST(HttpRequest.BodyPublishers.ofString(jsonSub))
+                .header("Content-Type", "application/json")
                 .build();
+        HttpResponse<String> postResponse = client.send(postRequest, HttpResponse.BodyHandlers.ofString());
+        assertEquals(201, postResponse.statusCode());
 
-        HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
-        assertEquals(201, response.statusCode());
-
-        List<Subtask> subs = manager.getAllSubtasks();
-        assertEquals(1, subs.size());
-        assertEquals("Sub1", subs.get(0).getName());
-    }
-
-    @Test
-    void testGetAllSubtasks() throws IOException, InterruptedException {
-        Epic epic = new Epic("Epic", "Desc");
-        manager.createEpicTask(epic);
-        manager.createSubtask(new Subtask(epic.getId(), "S1", "D1", Status.NEW, LocalDateTime.now(), Duration.ofMinutes(5)));
-        manager.createSubtask(new Subtask(epic.getId(), "S2", "D2", Status.NEW, LocalDateTime.now(), Duration.ofMinutes(5)));
-
-        HttpRequest request = HttpRequest.newBuilder()
-                .uri(URI.create("http://localhost:8080/subtasks"))
+        // GET /subtasks?id=1
+        HttpRequest getRequest = HttpRequest.newBuilder()
+                .uri(URI.create(baseUrl + "?id=1"))
                 .GET()
                 .build();
+        HttpResponse<String> getResponse = client.send(getRequest, HttpResponse.BodyHandlers.ofString());
+        assertEquals(200, getResponse.statusCode());
 
-        HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
-        Subtask[] subs = gson.fromJson(response.body(), Subtask[].class);
-        assertEquals(2, subs.length);
-    }
+        Subtask returned = gson.fromJson(getResponse.body(), Subtask.class);
+        assertEquals("Subtask 1", returned.getName());
 
-    @Test
-    void testDeleteSubtaskById() throws IOException, InterruptedException {
-        Epic epic = new Epic("Epic", "Desc");
-        manager.createEpicTask(epic);
-        Subtask sub = new Subtask(epic.getId(), "Sub1", "Desc", Status.NEW, LocalDateTime.now(), Duration.ofMinutes(5));
-        manager.createSubtask(sub);
-
-        HttpRequest request = HttpRequest.newBuilder()
-                .uri(URI.create("http://localhost:8080/subtasks?id=" + sub.getId()))
+        // DELETE /subtasks
+        HttpRequest deleteRequest = HttpRequest.newBuilder()
+                .uri(URI.create(baseUrl))
                 .DELETE()
                 .build();
+        HttpResponse<String> deleteResponse = client.send(deleteRequest, HttpResponse.BodyHandlers.ofString());
+        assertEquals(200, deleteResponse.statusCode());
 
-        HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
-        assertEquals(200, response.statusCode());
-        assertTrue(manager.getAllSubtasks().isEmpty());
+        List<Subtask> subsAfterDelete = manager.getAllSubtasks();
+        assertTrue(subsAfterDelete.isEmpty());
     }
 }

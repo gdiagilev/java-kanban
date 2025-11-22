@@ -12,7 +12,7 @@ public class HistoryHandler extends BaseHttpHandler implements HttpHandler {
     private final TaskManager manager;
     private final Gson gson;
 
-    public HistoryHandler(TaskManager manager, Gson gson) {
+    public HistoryHandler(Gson gson, TaskManager manager) {
         this.manager = manager;
         this.gson = gson;
     }
@@ -24,6 +24,7 @@ public class HistoryHandler extends BaseHttpHandler implements HttpHandler {
                 sendText(exchange, gson.toJson(manager.getHistory()));
                 return;
             }
+
             exchange.sendResponseHeaders(405, -1);
             exchange.close();
         } catch (Exception e) {

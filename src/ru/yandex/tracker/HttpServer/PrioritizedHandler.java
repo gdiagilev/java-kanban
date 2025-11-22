@@ -12,7 +12,7 @@ public class PrioritizedHandler extends BaseHttpHandler implements HttpHandler {
     private final TaskManager manager;
     private final Gson gson;
 
-    public PrioritizedHandler(TaskManager manager, Gson gson) {
+    public PrioritizedHandler(Gson gson, TaskManager manager) {
         this.manager = manager;
         this.gson = gson;
     }
@@ -24,6 +24,7 @@ public class PrioritizedHandler extends BaseHttpHandler implements HttpHandler {
                 sendText(exchange, gson.toJson(manager.getPrioritizedTasks()));
                 return;
             }
+
             exchange.sendResponseHeaders(405, -1);
             exchange.close();
         } catch (Exception e) {

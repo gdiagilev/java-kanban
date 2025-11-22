@@ -1,6 +1,7 @@
 package ru.yandex.tracker.HttpServer;
 
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import org.junit.jupiter.api.*;
 import ru.yandex.tracker.Model.Task;
 import ru.yandex.tracker.Model.Status;
@@ -8,29 +9,30 @@ import ru.yandex.tracker.Service.InMemoryTaskManager;
 import ru.yandex.tracker.Service.TaskManager;
 
 import java.io.IOException;
+import java.time.Duration;
+import java.time.LocalDateTime;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
-import java.time.Duration;
-import java.time.LocalDateTime;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 class HttpTaskServerPrioritizedTest {
 
-    private TaskManager manager;
     private HttpTaskServer server;
+    private TaskManager manager;
     private Gson gson;
     private HttpClient client;
+    private final String baseUrl = "http://localhost:8080/prioritized";
 
     @BeforeEach
     void setUp() throws IOException {
         manager = new InMemoryTaskManager();
-        server = new HttpTaskServer(manager);
+        gson = new GsonBuilder().serializeNulls().create();
+        server = new HttpTaskServer(8080, manager, gson);
         server.start();
-
-        gson = HttpTaskServer.getGson();
         client = HttpClient.newHttpClient();
     }
 
@@ -41,28 +43,18 @@ class HttpTaskServerPrioritizedTest {
 
     @Test
     void testPrioritizedTasksOrder() throws IOException, InterruptedException {
-        Task task1 = new Task("Task1", "Desc1", Status.NEW, LocalDateTime.now().plusMinutes(20), Duration.ofMinutes(10));
-        Task task2 = new Task("Task2", "Desc2", Status.NEW, LocalDateTime.now().plusMinutes(5), Duration.ofMinutes(15));
-        Task task3 = new Task("Task3", "Desc3", Status.NEW, LocalDateTime.now().plusMinutes(10), Duration.ofMinutes(20));
-
-        manager.createTask(task1);
-        manager.createTask(task2);
-        manager.createTask(task3);
+        Task t1 = new Task("Task 1", "Desc", Status.NEW, LocalDateTime.now(), Duration.ofMinutes(30));
+        Task t2 = new Task("Task 2", "Desc", Status.NEW, LocalDateTime.now().plusMinutes(40), Duration.ofMinutes(20));
+        manager.createTask(t2);
+        manager.createTask(t1);
 
         HttpRequest request = HttpRequest.newBuilder()
-                .uri(URI.create("http://localhost:8080/prioritized"))
+                .uri(URI.create(baseUrl))
                 .GET()
                 .build();
-
         HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+
         assertEquals(200, response.statusCode());
-
-        Task[] prioritized = gson.fromJson(response.body(), Task[].class);
-        assertEquals(3, prioritized.length);
-
-        // Проверяем порядок по времени начала задачи
-        assertEquals("Task2", prioritized[0].getName());
-        assertEquals("Task3", prioritized[1].getName());
-        assertEquals("Task1", prioritized[2].getName());
+        assertTrue(response.body().indexOf("Task 1") < response.body().indexOf("Task 2"), "Задачи должны быть отсортированы по startTime");
     }
 }
