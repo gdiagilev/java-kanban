@@ -4,7 +4,6 @@ import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 
 public class Epic extends Task {
 
@@ -28,7 +27,7 @@ public class Epic extends Task {
         updateEpicTime();
     }
 
-    public void removeSubtask(int subtaskId) {
+    public void removeSubtaskById(int subtaskId) {
         subtasks.removeIf(s -> s.getId() == subtaskId);
         updateStatus();
         updateEpicTime();
@@ -54,45 +53,39 @@ public class Epic extends Task {
             if (s.getStatus() != Status.DONE) allDone = false;
         }
 
-        if (allNew) {
-            setStatus(Status.NEW);
-        } else if (allDone) {
-            setStatus(Status.DONE);
-        } else {
-            setStatus(Status.IN_PROGRESS);
-        }
+        if (allNew) setStatus(Status.NEW);
+        else if (allDone) setStatus(Status.DONE);
+        else setStatus(Status.IN_PROGRESS);
     }
 
     public void updateEpicTime() {
         if (subtasks.isEmpty()) {
-            this.setStartTime(null);
-            this.setEndTime(null);
-            this.setDuration(Duration.ZERO);
+            setStartTime(null);
+            setEndTime(null);
+            setDuration(Duration.ZERO);
             return;
         }
 
-        LocalDateTime start = subtasks.stream()
-                .map(Task::getStartTime)
-                .filter(Objects::nonNull)
-                .min(LocalDateTime::compareTo)
-                .orElse(null);
+        LocalDateTime start = null;
+        LocalDateTime end = null;
+        Duration totalDuration = Duration.ZERO;
 
-        LocalDateTime end = subtasks.stream()
-                .map(Task::getEndTime)
-                .filter(Objects::nonNull)
-                .max(LocalDateTime::compareTo)
-                .orElse(null);
+        for (Subtask sub : subtasks) {
+            if (sub.getStartTime() != null && sub.getDuration() != null) {
+                LocalDateTime subStart = sub.getStartTime();
+                LocalDateTime subEnd = subStart.plus(sub.getDuration());
 
-        Duration totalDuration = subtasks.stream()
-                .map(Task::getDuration)
-                .filter(Objects::nonNull)
-                .reduce(Duration.ZERO, Duration::plus);
+                if (start == null || subStart.isBefore(start)) start = subStart;
+                if (end == null || subEnd.isAfter(end)) end = subEnd;
 
-        this.setStartTime(start);
-        this.setEndTime(end);
-        this.setDuration(totalDuration);
+                totalDuration = totalDuration.plus(sub.getDuration());
+            }
+        }
+
+        setStartTime(start);
+        setEndTime(end);
+        setDuration(totalDuration);
     }
-
 
     @Override
     public TaskType getTaskType() {
