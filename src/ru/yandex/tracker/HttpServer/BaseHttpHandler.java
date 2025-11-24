@@ -1,69 +1,54 @@
 package ru.yandex.tracker.HttpServer;
 
 import com.sun.net.httpserver.HttpExchange;
+
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
+import java.io.OutputStream;
 
-public class BaseHttpHandler {
+public abstract class BaseHttpHandler {
 
-    protected void sendText(HttpExchange h, String text) throws IOException {
-        byte[] resp = text.getBytes(StandardCharsets.UTF_8);
-        h.getResponseHeaders().add("Content-Type", "application/json;charset=utf-8");
-        h.sendResponseHeaders(200, resp.length);
-        h.getResponseBody().write(resp);
-        h.close();
+    protected void sendText(HttpExchange exchange, String text) throws IOException {
+        exchange.getResponseHeaders().add("Content-Type", "application/json");
+        byte[] bytes = text.getBytes();
+        exchange.sendResponseHeaders(200, bytes.length);
+        OutputStream os = exchange.getResponseBody();
+        os.write(bytes);
+        os.close();
     }
 
-    protected void sendCreated(HttpExchange h, String text) throws IOException {
-        byte[] resp = text == null ? new byte[0] : text.getBytes(StandardCharsets.UTF_8);
-        h.getResponseHeaders().add("Content-Type", "application/json;charset=utf-8");
-        h.sendResponseHeaders(201, resp.length);
-        if (resp.length > 0) h.getResponseBody().write(resp);
-        h.close();
+    protected void sendCreated(HttpExchange exchange, String text) throws IOException {
+        exchange.getResponseHeaders().add("Content-Type", "application/json");
+        byte[] bytes = text.getBytes();
+        exchange.sendResponseHeaders(201, bytes.length);
+        OutputStream os = exchange.getResponseBody();
+        os.write(bytes);
+        os.close();
     }
 
-    protected void sendNotFound(HttpExchange h) throws IOException {
-        String msg = "{\"error\":\"Not Found\"}";
-        byte[] resp = msg.getBytes(StandardCharsets.UTF_8);
-        h.getResponseHeaders().add("Content-Type", "application/json;charset=utf-8");
-        h.sendResponseHeaders(404, resp.length);
-        h.getResponseBody().write(resp);
-        h.close();
+    protected void sendNotFound(HttpExchange exchange) throws IOException {
+        exchange.sendResponseHeaders(404, -1);
+        exchange.close();
     }
 
-    protected void sendHasInteractions(HttpExchange h, String message) throws IOException {
-        byte[] resp = message == null ? new byte[0] : message.getBytes(StandardCharsets.UTF_8);
-        h.getResponseHeaders().add("Content-Type", "application/json;charset=utf-8");
-        h.sendResponseHeaders(406, resp.length);
-        if (resp.length > 0) h.getResponseBody().write(resp);
-        h.close();
-    }
-
-    protected void sendServerError(HttpExchange h, String message) throws IOException {
-        byte[] resp = message == null ? new byte[0] : message.getBytes(StandardCharsets.UTF_8);
-        h.getResponseHeaders().add("Content-Type", "application/json;charset=utf-8");
-        h.sendResponseHeaders(500, resp.length);
-        if (resp.length > 0) h.getResponseBody().write(resp);
-        h.close();
-    }
-
-    protected Integer getIdFromQuery(String rawQuery) {
-        if (rawQuery == null || rawQuery.isBlank()) return null;
-        String[] parts = rawQuery.split("&");
-        for (String p : parts) {
-            String[] kv = p.split("=");
-            if (kv.length == 2 && kv[0].equals("id")) {
-                try {
-                    return Integer.parseInt(kv[1]);
-                } catch (NumberFormatException e) {
-                    return null;
-                }
-            }
-        }
-        return null;
+    protected void sendServerError(HttpExchange exchange, String text) throws IOException {
+        exchange.getResponseHeaders().add("Content-Type", "application/json");
+        byte[] bytes = text.getBytes();
+        exchange.sendResponseHeaders(500, bytes.length);
+        OutputStream os = exchange.getResponseBody();
+        os.write(bytes);
+        os.close();
     }
 
     protected String readBody(HttpExchange exchange) throws IOException {
-        return new String(exchange.getRequestBody().readAllBytes(), StandardCharsets.UTF_8);
+        return new String(exchange.getRequestBody().readAllBytes());
+    }
+
+    protected Integer getIdFromQuery(String query) {
+        if (query == null || !query.contains("id=")) return null;
+        try {
+            return Integer.parseInt(query.split("=")[1]);
+        } catch (NumberFormatException e) {
+            return null;
+        }
     }
 }

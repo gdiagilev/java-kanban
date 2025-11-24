@@ -1,76 +1,60 @@
 package ru.yandex.tracker.Service;
 
 import ru.yandex.tracker.Model.Task;
+
 import java.util.*;
 
 public class InMemoryHistoryManager implements HistoryManager {
 
-    private final Map<Integer, Node<Task>> nodeMap = new HashMap<>();
-    private Node<Task> head;
-    private Node<Task> tail;
-    private int autoId = 1;
+    private static class Node {
+        Task task;
+        Node prev;
+        Node next;
 
-    private static class Node<T> {
-        T data;
-        Node<T> next;
-        Node<T> prev;
-
-        Node(Node<T> prev, T data, Node<T> next) {
+        Node(Node prev, Task task, Node next) {
             this.prev = prev;
-            this.data = data;
+            this.task = task;
             this.next = next;
         }
     }
 
+    private final Map<Integer, Node> nodeMap = new HashMap<>();
+    private Node head;
+    private Node tail;
+
     @Override
     public void add(Task task) {
         if (task == null) return;
-
-        if (task.getId() == 0) {
-            task.setId(autoId++);
-        }
-
         remove(task.getId());
 
-        Node<Task> newNode = new Node<>(tail, task, null);
-        if (tail != null) {
-            tail.next = newNode;
-        } else {
-            head = newNode;
-        }
-        tail = newNode;
-        nodeMap.put(task.getId(), newNode);
+        Node node = new Node(tail, task, null);
+        if (tail != null) tail.next = node;
+        tail = node;
+        if (head == null) head = node;
+
+        nodeMap.put(task.getId(), node);
+    }
+
+    @Override
+    public void remove(int id) {
+        Node node = nodeMap.remove(id);
+        if (node == null) return;
+
+        if (node.prev != null) node.prev.next = node.next;
+        else head = node.next;
+
+        if (node.next != null) node.next.prev = node.prev;
+        else tail = node.prev;
     }
 
     @Override
     public List<Task> getHistory() {
         List<Task> history = new ArrayList<>();
-        Node<Task> current = head;
+        Node current = head;
         while (current != null) {
-            history.add(current.data);
+            history.add(current.task);
             current = current.next;
         }
         return history;
-    }
-
-    @Override
-    public void remove(int id) {
-        Node<Task> node = nodeMap.remove(id);
-        if (node == null) return;
-
-        Node<Task> prev = node.prev;
-        Node<Task> next = node.next;
-
-        if (prev != null) {
-            prev.next = next;
-        } else {
-            head = next;
-        }
-
-        if (next != null) {
-            next.prev = prev;
-        } else {
-            tail = prev;
-        }
     }
 }

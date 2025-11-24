@@ -10,6 +10,7 @@ public class Task {
     private Status status;
     private LocalDateTime startTime;
     private Duration duration;
+    private LocalDateTime endTime;
 
     public Task(String name, String description, Status status, LocalDateTime startTime, Duration duration) {
         this.name = name;
@@ -17,68 +18,53 @@ public class Task {
         this.status = status;
         this.startTime = startTime;
         this.duration = duration;
+        this.endTime = calculateEndTime();
     }
 
-    public Task(String name, int id, Status status, LocalDateTime startTime, Duration duration, String description) {
-        this(name, description, status, startTime, duration);
-        this.id = id;
-    }
+    public int getId() { return id; }
+    public void setId(int id) { this.id = id; }
 
-    // --- Геттеры и сеттеры ---
-    public int getId() {
-        return id;
-    }
+    public String getName() { return name; }
+    public void setName(String name) { this.name = name; }
 
-    public void setId(int id) {
-        this.id = id;
-    }
+    public String getDescription() { return description; }
+    public void setDescription(String description) { this.description = description; }
 
-    public String getName() {
-        return name;
-    }
+    public Status getStatus() { return status; }
+    public void setStatus(Status status) { this.status = status; }
 
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public String getDescription() {
-        return description;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
-    }
-
-    public Status getStatus() {
-        return status;
-    }
-
-    public void setStatus(Status status) {
-        this.status = status;
-    }
-
-    public LocalDateTime getStartTime() {
-        return startTime;
-    }
-
+    public LocalDateTime getStartTime() { return startTime; }
     public void setStartTime(LocalDateTime startTime) {
         this.startTime = startTime;
+        this.endTime = calculateEndTime();
     }
 
-    public Duration getDuration() {
-        return duration;
-    }
-
+    public Duration getDuration() { return duration; }
     public void setDuration(Duration duration) {
         this.duration = duration;
+        this.endTime = calculateEndTime();
     }
 
-    public LocalDateTime getEndTime() {
-        if (startTime != null && duration != null) return startTime.plus(duration);
-        return null;
+    public LocalDateTime getEndTime() { return endTime; }
+
+    public void setEndTime(LocalDateTime endTime) {
+        this.endTime = endTime;
     }
 
-    public TaskType getTaskType() {
-        return TaskType.TASK;
+    private LocalDateTime calculateEndTime() {
+        return startTime != null && duration != null ? startTime.plus(duration) : null;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Task)) return false;
+        Task task = (Task) o;
+        return id == task.id;
+    }
+
+    @Override
+    public int hashCode() {
+        return id;
     }
 }

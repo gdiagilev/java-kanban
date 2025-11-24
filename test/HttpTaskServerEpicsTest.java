@@ -1,13 +1,9 @@
-package ru.yandex.tracker.HttpServer;
-
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import org.junit.jupiter.api.*;
-import ru.yandex.tracker.Model.Epic;
-import ru.yandex.tracker.Model.Status;
-import ru.yandex.tracker.Model.Subtask;
+import ru.yandex.tracker.HttpServer.HttpTaskServer;
+import ru.yandex.tracker.Model.*;
 import ru.yandex.tracker.Service.InMemoryTaskManager;
-import ru.yandex.tracker.Service.TaskManager;
 
 import java.io.IOException;
 import java.net.URI;
@@ -20,29 +16,24 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-@TestInstance(TestInstance.Lifecycle.PER_CLASS)
+@TestInstance(TestInstance.Lifecycle.PER_METHOD)
 public class HttpTaskServerEpicsTest {
 
     private HttpTaskServer server;
-    private TaskManager manager;
+    private InMemoryTaskManager manager;
     private Gson gson;
 
-    @BeforeAll
-    void init() throws IOException {
+    @BeforeEach
+    void setUp() throws IOException {
         manager = new InMemoryTaskManager();
+
         gson = new GsonBuilder()
                 .registerTypeAdapter(LocalDateTime.class, new ru.yandex.tracker.HttpServer.LocalDateTimeAdapter())
                 .registerTypeAdapter(Duration.class, new ru.yandex.tracker.HttpServer.DurationAdapter())
                 .serializeNulls()
                 .create();
-        server = new HttpTaskServer(manager, gson);
-    }
 
-    @BeforeEach
-    void setUp() {
-        manager.getAllTasks().forEach(t -> manager.deleteTask(t.getId()));
-        manager.getAllEpicTasks().forEach(e -> manager.deleteEpicTask(e.getId()));
-        manager.getAllSubtasks().forEach(s -> manager.deleteSubtask(s.getId()));
+        server = new HttpTaskServer(manager, gson);
         server.start();
     }
 

@@ -1,12 +1,10 @@
-package ru.yandex.tracker.HttpServer;
-
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import org.junit.jupiter.api.*;
+import ru.yandex.tracker.HttpServer.HttpTaskServer;
 import ru.yandex.tracker.Model.Status;
 import ru.yandex.tracker.Model.Task;
 import ru.yandex.tracker.Service.InMemoryTaskManager;
-import ru.yandex.tracker.Service.TaskManager;
 
 import java.io.IOException;
 import java.net.URI;
@@ -22,7 +20,7 @@ import static org.junit.jupiter.api.Assertions.*;
 public class HttpTaskServerHistoryTest {
 
     private HttpTaskServer server;
-    private TaskManager manager;
+    private InMemoryTaskManager manager;
     private Gson gson;
 
     @BeforeAll

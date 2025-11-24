@@ -3,9 +3,11 @@ package ru.yandex.tracker.HttpServer;
 import com.google.gson.Gson;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
+import ru.yandex.tracker.Model.Task;
 import ru.yandex.tracker.Service.TaskManager;
 
 import java.io.IOException;
+import java.util.List;
 
 public class HistoryHandler extends BaseHttpHandler implements HttpHandler {
 
@@ -19,16 +21,12 @@ public class HistoryHandler extends BaseHttpHandler implements HttpHandler {
 
     @Override
     public void handle(HttpExchange exchange) throws IOException {
-        try {
-            if ("GET".equalsIgnoreCase(exchange.getRequestMethod())) {
-                sendText(exchange, gson.toJson(manager.getHistory()));
-                return;
-            }
-
+        if (!"GET".equalsIgnoreCase(exchange.getRequestMethod())) {
             exchange.sendResponseHeaders(405, -1);
             exchange.close();
-        } catch (Exception e) {
-            sendServerError(exchange, "{\"error\":\"Internal Server Error\"}");
+            return;
         }
+        List<Task> history = manager.getHistory();
+        sendText(exchange, gson.toJson(history));
     }
 }

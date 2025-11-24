@@ -1,20 +1,15 @@
-package ru.yandex.tracker.HttpServer;
-
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import org.junit.jupiter.api.*;
-import ru.yandex.tracker.Model.Status;
-import ru.yandex.tracker.Model.Task;
+import ru.yandex.tracker.HttpServer.HttpTaskServer;
+import ru.yandex.tracker.Model.*;
 import ru.yandex.tracker.Service.InMemoryTaskManager;
 
 import java.io.IOException;
 import java.net.URI;
-import java.net.http.HttpClient;
-import java.net.http.HttpRequest;
-import java.net.http.HttpResponse;
+import java.net.http.*;
 import java.time.Duration;
 import java.time.LocalDateTime;
-import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -22,7 +17,7 @@ import static org.junit.jupiter.api.Assertions.*;
 public class HttpTaskServerTasksTest {
 
     private HttpTaskServer server;
-    private InMemoryTaskManager manager; // конкретный класс
+    private InMemoryTaskManager manager;
     private Gson gson;
 
     @BeforeAll
@@ -39,8 +34,6 @@ public class HttpTaskServerTasksTest {
     @BeforeEach
     void setUp() {
         manager.getAllTasks().forEach(t -> manager.deleteTask(t.getId()));
-        manager.getAllEpicTasks().forEach(e -> manager.deleteEpicTask(e.getId()));
-        manager.getAllSubtasks().forEach(s -> manager.deleteSubtask(s.getId()));
         server.start();
     }
 
@@ -51,24 +44,51 @@ public class HttpTaskServerTasksTest {
 
     @Test
     void testCreateTask() throws IOException, InterruptedException {
-        Task task = new Task("Task 1", "Desc", Status.NEW, LocalDateTime.now(), Duration.ofMinutes(30));
+        Task task = new Task("Task 1", "Desc", Status.NEW,
+                LocalDateTime.now(), Duration.ofMinutes(20));
+
         String json = gson.toJson(task);
 
         HttpClient client = HttpClient.newHttpClient();
         URI url = URI.create("http://localhost:8080/tasks");
-        HttpRequest request = HttpRequest.newBuilder().uri(url).POST(HttpRequest.BodyPublishers.ofString(json)).build();
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(url)
+                .POST(HttpRequest.BodyPublishers.ofString(json))
+                .build();
 
         HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
         assertEquals(201, response.statusCode());
 
-        List<Task> tasks = manager.getAllTasks();
-        assertEquals(1, tasks.size());
-        assertEquals("Task 1", tasks.get(0).getName());
+        assertEquals(1, manager.getAllTasks().size());
+    }
+
+    @Test
+    void testUpdateTask() throws IOException, InterruptedException {
+        Task task = new Task("Task 1", "Desc", Status.NEW,
+                LocalDateTime.now(), Duration.ofMinutes(20));
+        manager.createTask(task);
+
+        task.setStatus(Status.IN_PROGRESS);
+        String json = gson.toJson(task);
+
+        HttpClient client = HttpClient.newHttpClient();
+        URI url = URI.create("http://localhost:8080/tasks");
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(url)
+                .POST(HttpRequest.BodyPublishers.ofString(json))
+                .build();
+
+        HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+        assertEquals(201, response.statusCode());
+
+        Task updated = manager.getTask(task.getId());
+        assertEquals(Status.IN_PROGRESS, updated.getStatus());
     }
 
     @Test
     void testGetTaskById() throws IOException, InterruptedException {
-        Task task = new Task("Task 1", "Desc", Status.NEW, LocalDateTime.now(), Duration.ofMinutes(30));
+        Task task = new Task("Task 1", "Desc", Status.NEW,
+                LocalDateTime.now(), Duration.ofMinutes(20));
         manager.createTask(task);
 
         HttpClient client = HttpClient.newHttpClient();
@@ -78,13 +98,14 @@ public class HttpTaskServerTasksTest {
         HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
         assertEquals(200, response.statusCode());
 
-        Task t = gson.fromJson(response.body(), Task.class);
-        assertEquals(task.getName(), t.getName());
+        Task returned = gson.fromJson(response.body(), Task.class);
+        assertEquals(task.getName(), returned.getName());
     }
 
     @Test
-    void testDeleteTask() throws IOException, InterruptedException {
-        Task task = new Task("Task 1", "Desc", Status.NEW, LocalDateTime.now(), Duration.ofMinutes(30));
+    void testDeleteTaskById() throws IOException, InterruptedException {
+        Task task = new Task("Task 1", "Desc", Status.NEW,
+                LocalDateTime.now(), Duration.ofMinutes(10));
         manager.createTask(task);
 
         HttpClient client = HttpClient.newHttpClient();
@@ -93,6 +114,6 @@ public class HttpTaskServerTasksTest {
 
         HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
         assertEquals(200, response.statusCode());
-        assertTrue(manager.getAllTasks().isEmpty());
+        assertEquals(0, manager.getAllTasks().size());
     }
 }

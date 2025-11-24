@@ -1,57 +1,34 @@
 package ru.yandex.tracker.Service;
 
 import ru.yandex.tracker.Model.*;
-import ru.yandex.tracker.Exceptions.NotFoundException;
 
 import java.util.List;
 
-public interface TaskManager {
+public abstract class TaskManager {
 
-    Task getTask(int id) throws NotFoundException;
+    public abstract Task createTask(Task task);
+    public abstract Task updateTask(Task task);
+    public abstract Task getTask(int id);
+    public abstract List<Task> getAllTasks();
+    public abstract void deleteTask(int id);
+    public abstract void deleteAllTasks();
 
-    Epic getEpicTask(int id) throws NotFoundException;
+    public abstract Epic createEpicTask(Epic epic);
+    public abstract Epic updateEpicTask(Epic epic);
+    public abstract Epic getEpicTask(int id);
+    public abstract List<Epic> getAllEpicTasks();
+    public abstract void deleteEpicTask(int id);
+    public abstract void deleteAllEpicTasks();
 
-    Subtask getSubtask(int id) throws NotFoundException;
+    public abstract Subtask createSubtask(Subtask subtask);
+    public abstract Subtask updateSubtask(Subtask subtask);
+    public abstract Subtask getSubtask(int id);
+    public abstract List<Subtask> getAllSubtasks();
+    public abstract List<Subtask> getSubtasksOfEpic(int epicId);
+    public abstract void deleteSubtask(int id);
+    public abstract void deleteAllSubtasks();
 
-    List<Task> getAllTasks();
+    public abstract List<Task> getPrioritizedTasks();
 
-    List<Epic> getAllEpicTasks();
-
-    List<Subtask> getAllSubtasks();
-
-    List<Task> getHistory();
-
-    List<Task> getPrioritizedTasks();
-
-    void createTask(Task task);
-
-    void createEpicTask(Epic epicTask);
-
-    void createSubtask(Subtask subtask);
-
-    void updateTask(Task task) throws NotFoundException;
-
-    void updateEpicTask(Epic epicTask) throws NotFoundException;
-
-    void updateSubtask(Subtask subtask) throws NotFoundException;
-
-    void deleteTask(Task task) throws NotFoundException;
-
-    void deleteEpicTask(Epic epicTask) throws NotFoundException;
-
-    void deleteSubtask(Subtask subtask) throws NotFoundException;
-
-    void deleteTask(int id) throws NotFoundException;
-
-    void deleteEpicTask(int id) throws NotFoundException;
-
-    void deleteSubtask(int id) throws NotFoundException;
-
-    void deleteAllTasks();
-
-    void deleteAllEpicTasks();
-
-    void deleteAllSubtasks();
-
-    List<Subtask> getAllSubTasksByEpicId(int epicId) throws NotFoundException;
+    public abstract List<Task> getHistory();
 }

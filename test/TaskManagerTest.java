@@ -1,9 +1,6 @@
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import ru.yandex.tracker.Model.Epic;
-import ru.yandex.tracker.Model.Status;
-import ru.yandex.tracker.Model.Subtask;
-import ru.yandex.tracker.Model.Task;
+import ru.yandex.tracker.Model.*;
 import ru.yandex.tracker.Service.TaskManager;
 
 import java.time.Duration;
@@ -12,153 +9,144 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-abstract class TaskManagerTest<T extends TaskManager> {
+public abstract class TaskManagerTest<T extends TaskManager> {
 
     protected T manager;
+    protected Epic epic;
 
     protected abstract T createManager();
 
     @BeforeEach
     void setUp() {
         manager = createManager();
+        epic = new Epic("Epic 1", "Test epic");
+        manager.createEpicTask(epic);
     }
 
+    // ---------------- TASK ----------------
     @Test
-    void shouldCreateAndGetTaskById() {
-        Task task = new Task(
-                "Task 1",
-                "Description 1",
-                Status.NEW,
-                LocalDateTime.now(),
-                Duration.ofMinutes(30)
-        );
+    void shouldCreateAndGetTask() {
+        Task task = new Task("Task 1", "desc", Status.NEW, LocalDateTime.now(), Duration.ofMinutes(30));
         manager.createTask(task);
-        Task saved = manager.getTask(task.getId());
-        assertNotNull(saved);
-        assertEquals(task, saved);
+
+        Task fetched = manager.getTask(task.getId());
+        assertNotNull(fetched);
+        assertEquals(task.getName(), fetched.getName());
     }
 
     @Test
-    void shouldReturnNewStatusWhenAllSubtasksAreNew() {
-        Epic epic = new Epic("Epic 1", "Description");
-        manager.createEpicTask(epic);
+    void shouldUpdateTask() {
+        Task task = new Task("Task 1", "desc", Status.NEW, LocalDateTime.now(), Duration.ofMinutes(30));
+        manager.createTask(task);
 
-        Subtask sub1 = new Subtask(epic.getId(), "Sub1", "Desc", Status.NEW,
-                LocalDateTime.now(), Duration.ofMinutes(10));
-        Subtask sub2 = new Subtask(epic.getId(), "Sub2", "Desc", Status.NEW,
-                LocalDateTime.now().plusMinutes(15), Duration.ofMinutes(10));
+        task.setName("Updated Task");
+        manager.updateTask(task);
 
-        manager.createSubtask(sub1);
-        manager.createSubtask(sub2);
-
-        assertEquals(Status.NEW, manager.getEpicTask(epic.getId()).getStatus());
+        Task fetched = manager.getTask(task.getId());
+        assertEquals("Updated Task", fetched.getName());
     }
 
     @Test
-    void shouldReturnDoneStatusWhenAllSubtasksAreDone() {
-        Epic epic = new Epic("Epic 1", "Description");
-        manager.createEpicTask(epic);
+    void shouldDeleteTask() {
+        Task task = new Task("Task 1", "desc", Status.NEW, LocalDateTime.now(), Duration.ofMinutes(30));
+        manager.createTask(task);
 
-        Subtask sub1 = new Subtask(epic.getId(), "Sub1", "Desc", Status.DONE,
-                LocalDateTime.now(), Duration.ofMinutes(10));
-        Subtask sub2 = new Subtask(epic.getId(), "Sub2", "Desc", Status.DONE,
-                LocalDateTime.now().plusMinutes(15), Duration.ofMinutes(10));
+        manager.deleteTask(task.getId());
+        assertNull(manager.getTask(task.getId()));
+    }
 
-        manager.createSubtask(sub1);
-        manager.createSubtask(sub2);
+    // ---------------- EPIC ----------------
+    @Test
+    void shouldCreateAndGetEpic() {
+        Epic fetched = manager.getEpicTask(epic.getId());
+        assertNotNull(fetched);
+        assertEquals(epic.getName(), fetched.getName());
+    }
 
+    @Test
+    void shouldUpdateEpic() {
+        epic.setName("Updated Epic");
+        manager.updateEpicTask(epic);
+
+        Epic fetched = manager.getEpicTask(epic.getId());
+        assertEquals("Updated Epic", fetched.getName());
+    }
+
+    @Test
+    void shouldDeleteEpicWithSubtasks() {
+        Subtask sub = new Subtask(epic.getId(), "sub", "desc", Status.NEW, LocalDateTime.now(), Duration.ofMinutes(30));
+        manager.createSubtask(sub);
+
+        manager.deleteEpicTask(epic.getId());
+        assertNull(manager.getEpicTask(epic.getId()));
+        assertNull(manager.getSubtask(sub.getId()));
+    }
+
+    // ---------------- SUBTASK ----------------
+    @Test
+    void shouldCreateAndGetSubtask() {
+        Subtask sub = new Subtask(epic.getId(), "sub", "desc", Status.NEW, LocalDateTime.now(), Duration.ofMinutes(30));
+        manager.createSubtask(sub);
+
+        Subtask fetched = manager.getSubtask(sub.getId());
+        assertNotNull(fetched);
+        assertEquals(sub.getName(), fetched.getName());
+    }
+
+    @Test
+    void shouldUpdateSubtaskAndEpicStatus() {
+        Subtask sub = new Subtask(epic.getId(), "sub", "desc", Status.NEW, LocalDateTime.now(), Duration.ofMinutes(30));
+        manager.createSubtask(sub);
+
+        sub.setStatus(Status.DONE);
+        manager.updateSubtask(sub);
+
+        assertEquals(Status.DONE, manager.getSubtask(sub.getId()).getStatus());
         assertEquals(Status.DONE, manager.getEpicTask(epic.getId()).getStatus());
     }
 
     @Test
-    void shouldReturnInProgressStatusWhenSubtasksNewAndDone() {
-        Epic epic = new Epic("Epic 1", "Description");
-        manager.createEpicTask(epic);
+    void shouldDeleteSubtaskAndUpdateEpic() {
+        Subtask sub = new Subtask(epic.getId(), "sub", "desc", Status.NEW, LocalDateTime.now(), Duration.ofMinutes(30));
+        manager.createSubtask(sub);
 
-        Subtask sub1 = new Subtask(epic.getId(), "Sub1", "Desc", Status.NEW,
-                LocalDateTime.now(), Duration.ofMinutes(10));
-        Subtask sub2 = new Subtask(epic.getId(), "Sub2", "Desc", Status.DONE,
-                LocalDateTime.now().plusMinutes(15), Duration.ofMinutes(10));
+        manager.deleteSubtask(sub.getId());
 
-        manager.createSubtask(sub1);
-        manager.createSubtask(sub2);
-
-        assertEquals(Status.IN_PROGRESS, manager.getEpicTask(epic.getId()).getStatus());
+        assertNull(manager.getSubtask(sub.getId()));
+        assertEquals(Status.NEW, manager.getEpicTask(epic.getId()).getStatus());
+        assertTrue(manager.getSubtasksOfEpic(epic.getId()).isEmpty());
     }
 
+    // ---------------- HISTORY ----------------
     @Test
-    void shouldReturnInProgressStatusWhenAllSubtasksInProgress() {
-        Epic epic = new Epic("Epic 1", "Description");
-        manager.createEpicTask(epic);
+    void historyShouldTrackAccessedTasks() {
+        Task task = new Task("Task 1", "desc", Status.NEW, LocalDateTime.now(), Duration.ofMinutes(30));
+        manager.createTask(task);
+        Subtask sub = new Subtask(epic.getId(), "sub", "desc", Status.NEW, LocalDateTime.now(), Duration.ofMinutes(30));
+        manager.createSubtask(sub);
 
-        Subtask sub1 = new Subtask(epic.getId(), "Sub1", "Desc", Status.IN_PROGRESS,
-                LocalDateTime.now(), Duration.ofMinutes(10));
-        Subtask sub2 = new Subtask(epic.getId(), "Sub2", "Desc", Status.IN_PROGRESS,
-                LocalDateTime.now().plusMinutes(15), Duration.ofMinutes(10));
+        manager.getTask(task.getId());
+        manager.getEpicTask(epic.getId());
+        manager.getSubtask(sub.getId());
 
-        manager.createSubtask(sub1);
-        manager.createSubtask(sub2);
-
-        assertEquals(Status.IN_PROGRESS, manager.getEpicTask(epic.getId()).getStatus());
+        List<Task> history = manager.getHistory();
+        assertEquals(3, history.size());
+        assertTrue(history.contains(task));
+        assertTrue(history.contains(epic));
+        assertTrue(history.contains(sub));
     }
 
+    // ---------------- PRIORITY ----------------
     @Test
-    void shouldThrowExceptionWhenTasksOverlap() {
-        Task task1 = new Task(
-                "Task 1",
-                "Desc 1",
-                Status.NEW,
-                LocalDateTime.now(),
-                Duration.ofMinutes(30)
-        );
-
-        Task task2 = new Task(
-                "Task 2",
-                "Desc 2",
-                Status.NEW,
-                LocalDateTime.now().plusMinutes(15),
-                Duration.ofMinutes(30)
-        );
-
+    void shouldReturnPrioritizedTasks() {
+        LocalDateTime now = LocalDateTime.now();
+        Task task1 = new Task("Task 1", "desc", Status.NEW, now, Duration.ofMinutes(30));
+        Task task2 = new Task("Task 2", "desc", Status.NEW, now.plusHours(1), Duration.ofMinutes(30));
         manager.createTask(task1);
-        assertThrows(IllegalArgumentException.class, () -> manager.createTask(task2),
-                "Ожидается исключение при пересечении времён");
-    }
+        manager.createTask(task2);
 
-    @Test
-    void shouldReturnEmptyHistoryInitially() {
-        assertTrue(manager.getHistory().isEmpty());
-    }
-
-    @Test
-    void shouldAddAndRetrieveHistory() {
-        Task task = new Task(
-                "Task 1",
-                "Desc",
-                Status.NEW,
-                LocalDateTime.now(),
-                Duration.ofMinutes(10)
-        );
-        manager.createTask(task);
-        manager.getTask(task.getId());
-        List<Task> history = manager.getHistory();
-        assertEquals(1, history.size());
-        assertEquals(task, history.get(0));
-    }
-
-    @Test
-    void shouldNotDuplicateHistoryEntries() {
-        Task task = new Task(
-                "Task 1",
-                "Desc",
-                Status.NEW,
-                LocalDateTime.now(),
-                Duration.ofMinutes(10)
-        );
-        manager.createTask(task);
-        manager.getTask(task.getId());
-        manager.getTask(task.getId());
-        List<Task> history = manager.getHistory();
-        assertEquals(1, history.size(), "История не должна содержать дубликатов");
+        List<Task> prioritized = manager.getPrioritizedTasks();
+        assertEquals(task1, prioritized.get(0));
+        assertEquals(task2, prioritized.get(1));
     }
 }

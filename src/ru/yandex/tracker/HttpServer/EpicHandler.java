@@ -34,7 +34,7 @@ public class EpicHandler extends BaseHttpHandler implements HttpHandler {
                         sendServerError(exchange, "{\"error\":\"Invalid id\"}");
                         return;
                     }
-                    List<Subtask> subs = manager.getAllSubTasksByEpicId(id);
+                    List<Subtask> subs = manager.getSubtasksOfEpic(id);
                     sendText(exchange, gson.toJson(subs));
                     return;
                 }
@@ -90,7 +90,7 @@ public class EpicHandler extends BaseHttpHandler implements HttpHandler {
             exchange.close();
 
         } catch (IllegalArgumentException e) {
-            sendHasInteractions(exchange, "{\"error\":\"" + e.getMessage() + "\"}");
+            sendServerError(exchange, "{\"error\":\"" + e.getMessage() + "\"}");
         } catch (Exception ex) {
             sendServerError(exchange, "{\"error\":\"Internal Server Error\"}");
         }

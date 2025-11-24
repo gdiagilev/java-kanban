@@ -7,6 +7,7 @@ import ru.yandex.tracker.Model.Subtask;
 import ru.yandex.tracker.Service.TaskManager;
 
 import java.io.IOException;
+import java.util.List;
 
 public class SubtaskHandler extends BaseHttpHandler implements HttpHandler {
 
@@ -26,8 +27,10 @@ public class SubtaskHandler extends BaseHttpHandler implements HttpHandler {
 
             if ("GET".equalsIgnoreCase(method)) {
                 Integer id = getIdFromQuery(query);
-                if (id == null) sendText(exchange, gson.toJson(manager.getAllSubtasks()));
-                else {
+                if (id == null) {
+                    List<Subtask> subtasks = manager.getAllSubtasks();
+                    sendText(exchange, gson.toJson(subtasks));
+                } else {
                     Subtask sub = manager.getSubtask(id);
                     if (sub == null) sendNotFound(exchange);
                     else sendText(exchange, gson.toJson(sub));
@@ -36,34 +39,13 @@ public class SubtaskHandler extends BaseHttpHandler implements HttpHandler {
             }
 
             if ("POST".equalsIgnoreCase(method)) {
-                Subtask sub = gson.fromJson(readBody(exchange), Subtask.class);
-                if (sub == null) {
-                    sendServerError(exchange, "{\"error\":\"Invalid body\"}");
-                    return;
-                }
-
-                if (sub.getId() == 0) {
-                    if (manager.getEpicTask(sub.getEpicId()) == null) {
-                        sendNotFound(exchange);
-                        return;
-                    }
-                    try {
-                        manager.createSubtask(sub);
-                        sendCreated(exchange, gson.toJson(sub));
-                    } catch (IllegalArgumentException e) {
-                        sendHasInteractions(exchange, "{\"error\":\"" + e.getMessage() + "\"}");
-                    }
+                Subtask subtask = gson.fromJson(readBody(exchange), Subtask.class);
+                if (subtask.getId() == 0) {
+                    manager.createSubtask(subtask);
+                    sendCreated(exchange, gson.toJson(subtask));
                 } else {
-                    if (manager.getSubtask(sub.getId()) == null) {
-                        sendNotFound(exchange);
-                        return;
-                    }
-                    try {
-                        manager.updateSubtask(sub);
-                        sendText(exchange, gson.toJson(sub));
-                    } catch (IllegalArgumentException e) {
-                        sendHasInteractions(exchange, "{\"error\":\"" + e.getMessage() + "\"}");
-                    }
+                    manager.updateSubtask(subtask);
+                    sendText(exchange, gson.toJson(subtask));
                 }
                 return;
             }
@@ -74,21 +56,15 @@ public class SubtaskHandler extends BaseHttpHandler implements HttpHandler {
                     manager.deleteAllSubtasks();
                     sendText(exchange, "{\"result\":\"all subtasks deleted\"}");
                 } else {
-                    if (manager.getSubtask(id) == null) sendNotFound(exchange);
-                    else {
-                        manager.deleteSubtask(id);
-                        sendText(exchange, "{\"result\":\"deleted\"}");
-                    }
+                    manager.deleteSubtask(id);
+                    sendText(exchange, "{\"result\":\"deleted\"}");
                 }
                 return;
             }
 
             exchange.sendResponseHeaders(405, -1);
             exchange.close();
-
-        } catch (IllegalArgumentException e) {
-            sendHasInteractions(exchange, "{\"error\":\"" + e.getMessage() + "\"}");
-        } catch (Exception ex) {
+        } catch (Exception e) {
             sendServerError(exchange, "{\"error\":\"Internal Server Error\"}");
         }
     }

@@ -28,37 +28,24 @@ public class TaskHandler extends BaseHttpHandler implements HttpHandler {
             if ("GET".equalsIgnoreCase(method)) {
                 Integer id = getIdFromQuery(query);
                 if (id == null) {
-                    List<Task> all = manager.getAllTasks();
-                    sendText(exchange, gson.toJson(all));
+                    List<Task> tasks = manager.getAllTasks();
+                    sendText(exchange, gson.toJson(tasks));
                 } else {
-                    Task t = manager.getTask(id);
-                    if (t == null) sendNotFound(exchange);
-                    else sendText(exchange, gson.toJson(t));
+                    Task task = manager.getTask(id);
+                    if (task == null) sendNotFound(exchange);
+                    else sendText(exchange, gson.toJson(task));
                 }
                 return;
             }
 
             if ("POST".equalsIgnoreCase(method)) {
                 Task task = gson.fromJson(readBody(exchange), Task.class);
-                if (task == null) {
-                    sendServerError(exchange, "{\"error\":\"Invalid body\"}");
-                    return;
-                }
-
-                try {
-                    if (task.getId() == 0) {
-                        manager.createTask(task);
-                        sendCreated(exchange, gson.toJson(task));
-                    } else {
-                        if (manager.getTask(task.getId()) == null) {
-                            sendNotFound(exchange);
-                            return;
-                        }
-                        manager.updateTask(task);
-                        sendText(exchange, gson.toJson(task));
-                    }
-                } catch (IllegalArgumentException e) {
-                    sendHasInteractions(exchange, "{\"error\":\"" + e.getMessage() + "\"}");
+                if (task.getId() == 0) {
+                    manager.createTask(task);
+                    sendCreated(exchange, gson.toJson(task));
+                } else {
+                    manager.updateTask(task);
+                    sendText(exchange, gson.toJson(task));
                 }
                 return;
             }
@@ -69,11 +56,8 @@ public class TaskHandler extends BaseHttpHandler implements HttpHandler {
                     manager.deleteAllTasks();
                     sendText(exchange, "{\"result\":\"all tasks deleted\"}");
                 } else {
-                    if (manager.getTask(id) == null) sendNotFound(exchange);
-                    else {
-                        manager.deleteTask(id);
-                        sendText(exchange, "{\"result\":\"deleted\"}");
-                    }
+                    manager.deleteTask(id);
+                    sendText(exchange, "{\"result\":\"deleted\"}");
                 }
                 return;
             }
