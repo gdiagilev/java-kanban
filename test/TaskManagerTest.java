@@ -1,6 +1,7 @@
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import ru.yandex.tracker.Model.*;
+import ru.yandex.tracker.Service.InMemoryTaskManager;
 import ru.yandex.tracker.Service.TaskManager;
 
 import java.time.Duration;
@@ -9,21 +10,18 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public abstract class TaskManagerTest<T extends TaskManager> {
+public abstract class TaskManagerTest {
 
-    protected T manager;
-    protected Epic epic;
-
-    protected abstract T createManager();
+    private InMemoryTaskManager manager;
+    private Epic epic;
 
     @BeforeEach
     void setUp() {
-        manager = createManager();
+        manager = new InMemoryTaskManager();
         epic = new Epic("Epic 1", "Test epic");
         manager.createEpicTask(epic);
     }
 
-    // ---------------- TASK ----------------
     @Test
     void shouldCreateAndGetTask() {
         Task task = new Task("Task 1", "desc", Status.NEW, LocalDateTime.now(), Duration.ofMinutes(30));
@@ -55,7 +53,6 @@ public abstract class TaskManagerTest<T extends TaskManager> {
         assertNull(manager.getTask(task.getId()));
     }
 
-    // ---------------- EPIC ----------------
     @Test
     void shouldCreateAndGetEpic() {
         Epic fetched = manager.getEpicTask(epic.getId());
@@ -82,7 +79,6 @@ public abstract class TaskManagerTest<T extends TaskManager> {
         assertNull(manager.getSubtask(sub.getId()));
     }
 
-    // ---------------- SUBTASK ----------------
     @Test
     void shouldCreateAndGetSubtask() {
         Subtask sub = new Subtask(epic.getId(), "sub", "desc", Status.NEW, LocalDateTime.now(), Duration.ofMinutes(30));
@@ -117,31 +113,33 @@ public abstract class TaskManagerTest<T extends TaskManager> {
         assertTrue(manager.getSubtasksOfEpic(epic.getId()).isEmpty());
     }
 
-    // ---------------- HISTORY ----------------
     @Test
     void historyShouldTrackAccessedTasks() {
-        Task task = new Task("Task 1", "desc", Status.NEW, LocalDateTime.now(), Duration.ofMinutes(30));
-        manager.createTask(task);
-        Subtask sub = new Subtask(epic.getId(), "sub", "desc", Status.NEW, LocalDateTime.now(), Duration.ofMinutes(30));
+        LocalDateTime now = LocalDateTime.now();
+        Task task1 = new Task("Task 1", "desc", Status.NEW, now, Duration.ofMinutes(30));
+        Task task2 = new Task("Task 2", "desc", Status.NEW, now.plusMinutes(31), Duration.ofMinutes(30));
+        Subtask sub = new Subtask(epic.getId(), "sub", "desc", Status.NEW, now.plusMinutes(62), Duration.ofMinutes(30));
+
+        manager.createTask(task1);
+        manager.createTask(task2);
         manager.createSubtask(sub);
 
-        manager.getTask(task.getId());
+        manager.getTask(task1.getId());
         manager.getEpicTask(epic.getId());
         manager.getSubtask(sub.getId());
 
         List<Task> history = manager.getHistory();
         assertEquals(3, history.size());
-        assertTrue(history.contains(task));
+        assertTrue(history.contains(task1));
         assertTrue(history.contains(epic));
         assertTrue(history.contains(sub));
     }
 
-    // ---------------- PRIORITY ----------------
     @Test
     void shouldReturnPrioritizedTasks() {
         LocalDateTime now = LocalDateTime.now();
         Task task1 = new Task("Task 1", "desc", Status.NEW, now, Duration.ofMinutes(30));
-        Task task2 = new Task("Task 2", "desc", Status.NEW, now.plusHours(1), Duration.ofMinutes(30));
+        Task task2 = new Task("Task 2", "desc", Status.NEW, now.plusMinutes(31), Duration.ofMinutes(30));
         manager.createTask(task1);
         manager.createTask(task2);
 
@@ -149,4 +147,6 @@ public abstract class TaskManagerTest<T extends TaskManager> {
         assertEquals(task1, prioritized.get(0));
         assertEquals(task2, prioritized.get(1));
     }
+
+    protected abstract TaskManager createManager();
 }

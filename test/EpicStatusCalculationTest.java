@@ -28,8 +28,7 @@ public class EpicStatusCalculationTest {
         manager.createSubtask(sub1);
         manager.createSubtask(sub2);
 
-        assertEquals(Status.NEW, manager.getEpicTask(epic.getId()).getStatus(),
-                "Все подзадачи — NEW, значит эпик должен быть NEW");
+        assertEquals(Status.NEW, manager.getEpicTask(epic.getId()).getStatus(), "Все подзадачи — NEW, значит эпик должен быть NEW");
     }
 
     @Test
@@ -41,8 +40,7 @@ public class EpicStatusCalculationTest {
         manager.createSubtask(sub1);
         manager.createSubtask(sub2);
 
-        assertEquals(Status.DONE, manager.getEpicTask(epic.getId()).getStatus(),
-                "Все подзадачи — DONE, значит эпик должен быть DONE");
+        assertEquals(Status.DONE, manager.getEpicTask(epic.getId()).getStatus(), "Все подзадачи — DONE, значит эпик должен быть DONE");
     }
 
     @Test
@@ -54,8 +52,7 @@ public class EpicStatusCalculationTest {
         manager.createSubtask(sub1);
         manager.createSubtask(sub2);
 
-        assertEquals(Status.IN_PROGRESS, manager.getEpicTask(epic.getId()).getStatus(),
-                "NEW + DONE => эпик должен быть IN_PROGRESS");
+        assertEquals(Status.IN_PROGRESS, manager.getEpicTask(epic.getId()).getStatus(), "NEW + DONE => эпик должен быть IN_PROGRESS");
     }
 
     @Test
@@ -67,7 +64,6 @@ public class EpicStatusCalculationTest {
         manager.createSubtask(sub1);
         manager.createSubtask(sub2);
 
-        assertEquals(Status.IN_PROGRESS, manager.getEpicTask(epic.getId()).getStatus(),
-                "Все подзадачи — IN_PROGRESS => эпик должен быть IN_PROGRESS");
+        assertEquals(Status.IN_PROGRESS, manager.getEpicTask(epic.getId()).getStatus(), "Все подзадачи — IN_PROGRESS => эпик должен быть IN_PROGRESS");
     }
 }

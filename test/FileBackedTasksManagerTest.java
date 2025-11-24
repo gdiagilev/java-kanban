@@ -1,12 +1,14 @@
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import ru.yandex.tracker.Service.FileBackedTasksManager;
+import ru.yandex.tracker.Service.TaskManager;
+import ru.yandex.tracker.TaskManagerTest;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
-public class FileBackedTasksManagerTest extends TaskManagerTest<FileBackedTasksManager> {
+public class FileBackedTasksManagerTest extends TaskManagerTest {
 
     private Path testFile;
 
@@ -16,12 +18,12 @@ public class FileBackedTasksManagerTest extends TaskManagerTest<FileBackedTasksM
     }
 
     @AfterEach
-    void clean() throws IOException {
+    void cleanTestFile() throws IOException {
         Files.deleteIfExists(testFile);
     }
 
     @Override
-    protected FileBackedTasksManager createManager() {
+    protected TaskManager createManager() {
         return new FileBackedTasksManager(testFile);
     }
 }
