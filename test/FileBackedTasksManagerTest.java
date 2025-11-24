@@ -2,7 +2,6 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import ru.yandex.tracker.Service.FileBackedTasksManager;
 import ru.yandex.tracker.Service.TaskManager;
-import ru.yandex.tracker.TaskManagerTest;
 
 import java.io.IOException;
 import java.nio.file.Files;
