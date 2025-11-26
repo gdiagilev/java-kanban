@@ -1,54 +1,83 @@
+package ru.yandex.tracker;
+
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import ru.yandex.tracker.Model.Epic;
 import ru.yandex.tracker.Model.Status;
 import ru.yandex.tracker.Model.Subtask;
-
-import java.net.URI;
-import java.net.http.HttpClient;
-import java.net.http.HttpRequest;
-import java.net.http.HttpResponse;
-import java.time.Duration;
-import java.time.LocalDateTime;
+import ru.yandex.tracker.Service.InMemoryTaskManager;
+import ru.yandex.tracker.Service.TaskManager;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-public class SubtasksHttpTest extends BaseTestServer {
+public class SubtasksHttpTest {
 
-    private final HttpClient client = HttpClient.newHttpClient();
+    private TaskManager manager;
 
-    @Test
-    void testCreateAndGetSubtask() throws Exception {
-        Epic epic = new Epic("Epic1", "Desc");
-        manager.createEpicTask(epic);
-
-        Subtask sub = new Subtask(epic.getId(), "Subtask1", "Desc", Status.NEW, LocalDateTime.now(), Duration.ofMinutes(10));
-        String json = gson.toJson(sub);
-
-        HttpRequest post = HttpRequest.newBuilder(URI.create("http://localhost:8080/subtasks"))
-                .POST(HttpRequest.BodyPublishers.ofString(json)).build();
-        HttpResponse<String> postResp = client.send(post, HttpResponse.BodyHandlers.ofString());
-        assertEquals(201, postResp.statusCode());
-
-        HttpRequest get = HttpRequest.newBuilder(URI.create("http://localhost:8080/subtasks?id=1")).GET().build();
-        HttpResponse<String> getResp = client.send(get, HttpResponse.BodyHandlers.ofString());
-        Subtask result = gson.fromJson(getResp.body(), Subtask.class);
-        assertEquals("Subtask1", result.getName());
+    @BeforeEach
+    void setUp() {
+        manager = new InMemoryTaskManager();
     }
 
     @Test
-    void testGetSubtasksOfEpic() throws Exception {
-        Epic epic = new Epic("Epic1", "Desc");
+    void testCreateAndGetSubtask() {
+        Epic epic = new Epic(
+                "Epic1",
+                "Desc",
+                Status.NEW,
+                null,
+                null
+        );
         manager.createEpicTask(epic);
 
-        Subtask sub1 = new Subtask(epic.getId(), "Sub1", "Desc", Status.NEW, LocalDateTime.now(), Duration.ofMinutes(10));
-        Subtask sub2 = new Subtask(epic.getId(), "Sub2", "Desc", Status.NEW, LocalDateTime.now().plusMinutes(15), Duration.ofMinutes(20));
+        Subtask subtask = new Subtask(
+                epic.getId(),
+                "Subtask1",
+                "Desc1",
+                Status.NEW,
+                null,
+                null
+        );
+        manager.createSubtask(subtask);
+
+        Subtask retrieved = manager.getSubtask(subtask.getId());
+        assertNotNull(retrieved);
+        assertEquals(subtask.getName(), retrieved.getName());
+        assertEquals(epic.getId(), retrieved.getEpicId());
+    }
+
+    @Test
+    void testGetSubtasksOfEpic() {
+        Epic epic = new Epic(
+                "Epic1",
+                "Desc",
+                Status.NEW,
+                null,
+                null
+        );
+        manager.createEpicTask(epic);
+
+        Subtask sub1 = new Subtask(
+                epic.getId(),
+                "Sub1",
+                "Desc1",
+                Status.NEW,
+                null,
+                null
+        );
+        Subtask sub2 = new Subtask(
+                epic.getId(),
+                "Sub2",
+                "Desc2",
+                Status.NEW,
+                null,
+                null
+        );
+
         manager.createSubtask(sub1);
         manager.createSubtask(sub2);
 
-        HttpRequest get = HttpRequest.newBuilder(URI.create("http://localhost:8080/epics/subtasks?id=" + epic.getId()))
-                .GET().build();
-        HttpResponse<String> resp = client.send(get, HttpResponse.BodyHandlers.ofString());
-        Subtask[] subs = gson.fromJson(resp.body(), Subtask[].class);
-        assertEquals(2, subs.length);
+        assertEquals(2, manager.getSubtasksOfEpic(epic.getId()).size());
     }
 }

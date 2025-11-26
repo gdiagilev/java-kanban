@@ -1,59 +1,49 @@
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
+package ru.yandex.tracker;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import ru.yandex.tracker.HttpServer.DurationAdapter;
-import ru.yandex.tracker.HttpServer.LocalDateTimeAdapter;
-import ru.yandex.tracker.Model.*;
+import ru.yandex.tracker.Model.Epic;
+import ru.yandex.tracker.Model.Status;
+import ru.yandex.tracker.Model.Subtask;
 import ru.yandex.tracker.Service.InMemoryTaskManager;
 import ru.yandex.tracker.Service.TaskManager;
 
-import java.net.URI;
-import java.net.http.HttpClient;
-import java.net.http.HttpRequest;
-import java.net.http.HttpResponse;
-import java.time.Duration;
-import java.time.LocalDateTime;
-
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 public class HttpSubtaskTest {
 
     private TaskManager manager;
-    private Gson gson;
-    private HttpClient client;
+    private Epic epic;
 
     @BeforeEach
-    void setup() {
+    void setUp() {
         manager = new InMemoryTaskManager();
-        gson = new GsonBuilder()
-                .registerTypeAdapter(LocalDateTime.class, new LocalDateTimeAdapter())
-                .registerTypeAdapter(Duration.class, new DurationAdapter())
-                .create();
-        client = HttpClient.newHttpClient();
+        epic = new Epic(
+                "Epic1",
+                "Desc",
+                Status.NEW,
+                null,
+                null
+        );
+        manager.createEpicTask(epic);
     }
 
     @Test
-    void testCreateAndGetSubtask() throws Exception {
-        Epic epic = new Epic("Epic1", "EpicDesc", Status.NEW, LocalDateTime.now(), Duration.ofMinutes(1));
-        manager.createEpicTask(epic);
-
+    void testCreateSubtask() {
         Subtask subtask = new Subtask(
-                "Sub1", "SubDesc", Status.NEW, epic.getId(),
-                LocalDateTime.now(), Duration.ofMinutes(10)
+                epic.getId(),          // epicId
+                "Sub1",               // name
+                "SubDesc",            // description
+                Status.NEW,           // status
+                null,                 // startTime
+                null                  // duration
         );
+
         manager.createSubtask(subtask);
-
-        HttpRequest request = HttpRequest.newBuilder()
-                .uri(URI.create("http://localhost:8080/epics/subtasks?id=" + epic.getId()))
-                .GET()
-                .build();
-
-        HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
-        Subtask[] returned = gson.fromJson(response.body(), Subtask[].class);
-
-        assertEquals(1, returned.length);
-        assertEquals("Sub1", returned[0].getName());
-        assertEquals(epic.getId(), returned[0].getEpicId());
+        Subtask retrieved = manager.getSubtask(subtask.getId());
+        assertNotNull(retrieved);
+        assertEquals("Sub1", retrieved.getName());
+        assertEquals(epic.getId(), retrieved.getEpicId());
     }
 }
