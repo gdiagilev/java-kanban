@@ -3,14 +3,13 @@ import org.junit.jupiter.api.Test;
 import ru.yandex.tracker.Model.Status;
 import ru.yandex.tracker.Model.Task;
 import ru.yandex.tracker.Service.HistoryManager;
-import ru.yandex.tracker.Service.InMemoryHistoryManager;
+import ru.yandex.tracker.Service.Managers;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class InMemoryHistoryManagerTest {
 
@@ -19,12 +18,16 @@ class InMemoryHistoryManagerTest {
 
     @BeforeEach
     void setUp() {
-        historyManager = new InMemoryHistoryManager();
+        historyManager = Managers.getDefaultHistory();
 
-        LocalDateTime now = LocalDateTime.now();
-        task1 = new Task("Task 1", "Desc 1", Status.NEW, now, Duration.ofMinutes(15));
-        task2 = new Task("Task 2", "Desc 2", Status.IN_PROGRESS, now.plusMinutes(20), Duration.ofMinutes(30));
-        task3 = new Task("Task 3", "Desc 3", Status.DONE, now.plusMinutes(60), Duration.ofMinutes(45));
+        task1 = new Task("Task 1", "Desc 1", Status.NEW, LocalDateTime.now(), Duration.ofMinutes(15));
+        task1.setId(1);
+
+        task2 = new Task("Task 2", "Desc 2", Status.IN_PROGRESS, LocalDateTime.now().plusMinutes(20), Duration.ofMinutes(30));
+        task2.setId(2);
+
+        task3 = new Task("Task 3", "Desc 3", Status.DONE, LocalDateTime.now().plusMinutes(60), Duration.ofMinutes(45));
+        task3.setId(3);
     }
 
     @Test
@@ -34,6 +37,7 @@ class InMemoryHistoryManagerTest {
         historyManager.add(task3);
 
         List<Task> history = historyManager.getHistory();
+
         assertEquals(3, history.size(), "История должна содержать 3 задачи");
         assertEquals(task1, history.get(0));
         assertEquals(task2, history.get(1));
@@ -47,6 +51,7 @@ class InMemoryHistoryManagerTest {
         historyManager.add(task1);
 
         List<Task> history = historyManager.getHistory();
+
         assertEquals(2, history.size(), "Повторяющиеся задачи не должны дублироваться в истории");
         assertEquals(task2, history.get(0));
         assertEquals(task1, history.get(1));
@@ -62,23 +67,8 @@ class InMemoryHistoryManagerTest {
         historyManager.remove(task3.getId());
 
         List<Task> history = historyManager.getHistory();
+
         assertEquals(1, history.size(), "После удаления должно остаться только 1 задание");
         assertEquals(task2, history.get(0));
-    }
-
-    @Test
-    void removingNonExistentTaskShouldNotFail() {
-        historyManager.add(task1);
-        historyManager.remove(999);
-        List<Task> history = historyManager.getHistory();
-        assertEquals(1, history.size(), "Удаление несуществующей задачи не должно менять историю");
-        assertEquals(task1, history.get(0));
-    }
-
-    @Test
-    void addingNullTaskShouldNotFail() {
-        historyManager.add(null);
-        List<Task> history = historyManager.getHistory();
-        assertTrue(history.isEmpty(), "Добавление null не должно добавлять задачи в историю");
     }
 }

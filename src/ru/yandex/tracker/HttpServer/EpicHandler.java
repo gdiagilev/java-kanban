@@ -4,10 +4,12 @@ import com.google.gson.Gson;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import ru.yandex.tracker.Model.Epic;
-import ru.yandex.tracker.Model.Subtask;
 import ru.yandex.tracker.Service.TaskManager;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.List;
 
 public class EpicHandler extends BaseHttpHandler implements HttpHandler {
@@ -22,77 +24,48 @@ public class EpicHandler extends BaseHttpHandler implements HttpHandler {
 
     @Override
     public void handle(HttpExchange exchange) throws IOException {
+        String method = exchange.getRequestMethod();
         try {
-            String method = exchange.getRequestMethod();
-            String path = exchange.getRequestURI().getPath();
-            String query = exchange.getRequestURI().getQuery();
+            switch (method) {
+                case "POST":
+                    String body = new String(exchange.getRequestBody().readAllBytes(), StandardCharsets.UTF_8);
+                    Epic epic = gson.fromJson(body, Epic.class);
 
-            if ("GET".equalsIgnoreCase(method)) {
-                if (path.endsWith("/subtasks")) {
-                    Integer id = getIdFromQuery(query);
-                    if (id == null) {
-                        sendServerError(exchange, "{\"error\":\"Invalid id\"}");
-                        return;
+                    if (epic.getStartTime() == null) {
+                        epic.setStartTime(LocalDateTime.now());
                     }
-                    List<Subtask> subs = manager.getSubtasksOfEpic(id);
-                    sendText(exchange, gson.toJson(subs));
-                    return;
-                }
+                    if (epic.getDuration() == null) {
+                        epic.setDuration(Duration.ZERO);
+                    }
 
-                Integer id = getIdFromQuery(query);
-                if (id == null) {
-                    sendText(exchange, gson.toJson(manager.getAllEpicTasks()));
-                } else {
-                    Epic epic = manager.getEpicTask(id);
-                    if (epic == null) sendNotFound(exchange);
-                    else sendText(exchange, gson.toJson(epic));
-                }
-                return;
-            }
-
-            if ("POST".equalsIgnoreCase(method)) {
-                Epic epic = gson.fromJson(readBody(exchange), Epic.class);
-                if (epic == null) {
-                    sendServerError(exchange, "{\"error\":\"Invalid body\"}");
-                    return;
-                }
-
-                if (epic.getId() == 0) {
                     manager.createEpicTask(epic);
-                    sendCreated(exchange, gson.toJson(epic));
-                } else {
-                    if (manager.getEpicTask(epic.getId()) == null) {
-                        sendNotFound(exchange);
-                        return;
-                    }
-                    manager.updateEpicTask(epic);
-                    sendText(exchange, gson.toJson(epic));
-                }
-                return;
+                    sendText(exchange, gson.toJson(epic), 201); // 201 Created
+                    break;
+                case "GET":
+                    List<Epic> epics = manager.getAllEpicTasks();
+                    sendText(exchange, gson.toJson(epics), 200);
+                    break;
+                default:
+                    sendError(exchange, "Метод не поддерживается", 405);
             }
-
-            if ("DELETE".equalsIgnoreCase(method)) {
-                Integer id = getIdFromQuery(query);
-                if (id == null) {
-                    manager.deleteAllEpicTasks();
-                    sendText(exchange, "{\"result\":\"all epics deleted\"}");
-                } else {
-                    if (manager.getEpicTask(id) == null) sendNotFound(exchange);
-                    else {
-                        manager.deleteEpicTask(id);
-                        sendText(exchange, "{\"result\":\"deleted\"}");
-                    }
-                }
-                return;
-            }
-
-            exchange.sendResponseHeaders(405, -1);
-            exchange.close();
-
-        } catch (IllegalArgumentException e) {
-            sendServerError(exchange, "{\"error\":\"" + e.getMessage() + "\"}");
-        } catch (Exception ex) {
-            sendServerError(exchange, "{\"error\":\"Internal Server Error\"}");
+        } catch (Exception e) {
+            sendError(exchange, "Ошибка при обработке запроса: " + e.getMessage(), 500);
         }
     }
+
+    private void sendText(HttpExchange exchange, String text, int code) throws IOException {
+        byte[] resp = text.getBytes(StandardCharsets.UTF_8);
+        exchange.getResponseHeaders().add("Content-Type", "application/json;charset=utf-8");
+        exchange.sendResponseHeaders(code, resp.length);
+        exchange.getResponseBody().write(resp);
+        exchange.close();
+    }
+
+    private void sendError(HttpExchange exchange, String message, int code) throws IOException {
+        byte[] resp = message.getBytes(StandardCharsets.UTF_8);
+        exchange.sendResponseHeaders(code, resp.length);
+        exchange.getResponseBody().write(resp);
+        exchange.close();
+    }
+
 }

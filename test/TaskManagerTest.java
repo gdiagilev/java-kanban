@@ -12,8 +12,8 @@ import static org.junit.jupiter.api.Assertions.*;
 
 public abstract class TaskManagerTest {
 
-    private InMemoryTaskManager manager;
-    private Epic epic;
+    protected InMemoryTaskManager manager;
+    protected Epic epic;
 
     @BeforeEach
     void setUp() {
@@ -24,7 +24,8 @@ public abstract class TaskManagerTest {
 
     @Test
     void shouldCreateAndGetTask() {
-        Task task = new Task("Task 1", "desc", Status.NEW, LocalDateTime.now(), Duration.ofMinutes(30));
+        Task task = new Task("Task 1", "desc", Status.NEW,
+                LocalDateTime.now(), Duration.ofMinutes(30));
         manager.createTask(task);
 
         Task fetched = manager.getTask(task.getId());
@@ -34,7 +35,8 @@ public abstract class TaskManagerTest {
 
     @Test
     void shouldUpdateTask() {
-        Task task = new Task("Task 1", "desc", Status.NEW, LocalDateTime.now(), Duration.ofMinutes(30));
+        Task task = new Task("Task 1", "desc", Status.NEW,
+                LocalDateTime.now(), Duration.ofMinutes(30));
         manager.createTask(task);
 
         task.setName("Updated Task");
@@ -46,7 +48,8 @@ public abstract class TaskManagerTest {
 
     @Test
     void shouldDeleteTask() {
-        Task task = new Task("Task 1", "desc", Status.NEW, LocalDateTime.now(), Duration.ofMinutes(30));
+        Task task = new Task("Task 1", "desc", Status.NEW,
+                LocalDateTime.now(), Duration.ofMinutes(30));
         manager.createTask(task);
 
         manager.deleteTask(task.getId());
@@ -71,7 +74,8 @@ public abstract class TaskManagerTest {
 
     @Test
     void shouldDeleteEpicWithSubtasks() {
-        Subtask sub = new Subtask(epic.getId(), "sub", "desc", Status.NEW, LocalDateTime.now(), Duration.ofMinutes(30));
+        Subtask sub = new Subtask(epic.getId(), "sub", "desc", Status.NEW,
+                LocalDateTime.now(), Duration.ofMinutes(30));
         manager.createSubtask(sub);
 
         manager.deleteEpicTask(epic.getId());
@@ -81,7 +85,8 @@ public abstract class TaskManagerTest {
 
     @Test
     void shouldCreateAndGetSubtask() {
-        Subtask sub = new Subtask(epic.getId(), "sub", "desc", Status.NEW, LocalDateTime.now(), Duration.ofMinutes(30));
+        Subtask sub = new Subtask(epic.getId(), "sub", "desc", Status.NEW,
+                LocalDateTime.now(), Duration.ofMinutes(30));
         manager.createSubtask(sub);
 
         Subtask fetched = manager.getSubtask(sub.getId());
@@ -91,7 +96,8 @@ public abstract class TaskManagerTest {
 
     @Test
     void shouldUpdateSubtaskAndEpicStatus() {
-        Subtask sub = new Subtask(epic.getId(), "sub", "desc", Status.NEW, LocalDateTime.now(), Duration.ofMinutes(30));
+        Subtask sub = new Subtask(epic.getId(), "sub", "desc", Status.NEW,
+                LocalDateTime.now(), Duration.ofMinutes(30));
         manager.createSubtask(sub);
 
         sub.setStatus(Status.DONE);
@@ -103,7 +109,8 @@ public abstract class TaskManagerTest {
 
     @Test
     void shouldDeleteSubtaskAndUpdateEpic() {
-        Subtask sub = new Subtask(epic.getId(), "sub", "desc", Status.NEW, LocalDateTime.now(), Duration.ofMinutes(30));
+        Subtask sub = new Subtask(epic.getId(), "sub", "desc", Status.NEW,
+                LocalDateTime.now(), Duration.ofMinutes(30));
         manager.createSubtask(sub);
 
         manager.deleteSubtask(sub.getId());
@@ -115,10 +122,12 @@ public abstract class TaskManagerTest {
 
     @Test
     void historyShouldTrackAccessedTasks() {
-        LocalDateTime now = LocalDateTime.now();
-        Task task1 = new Task("Task 1", "desc", Status.NEW, now, Duration.ofMinutes(30));
-        Task task2 = new Task("Task 2", "desc", Status.NEW, now.plusMinutes(31), Duration.ofMinutes(30));
-        Subtask sub = new Subtask(epic.getId(), "sub", "desc", Status.NEW, now.plusMinutes(62), Duration.ofMinutes(30));
+        Task task1 = new Task("Task 1", "desc", Status.NEW,
+                LocalDateTime.now(), Duration.ofMinutes(30));
+        Task task2 = new Task("Task 2", "desc", Status.NEW,
+                LocalDateTime.now().plusMinutes(40), Duration.ofMinutes(30));
+        Subtask sub = new Subtask(epic.getId(), "sub", "desc", Status.NEW,
+                LocalDateTime.now().plusMinutes(80), Duration.ofMinutes(30));
 
         manager.createTask(task1);
         manager.createTask(task2);
@@ -137,9 +146,11 @@ public abstract class TaskManagerTest {
 
     @Test
     void shouldReturnPrioritizedTasks() {
-        LocalDateTime now = LocalDateTime.now();
-        Task task1 = new Task("Task 1", "desc", Status.NEW, now, Duration.ofMinutes(30));
-        Task task2 = new Task("Task 2", "desc", Status.NEW, now.plusMinutes(31), Duration.ofMinutes(30));
+        Task task1 = new Task("Task 1", "desc", Status.NEW,
+                LocalDateTime.now(), Duration.ofMinutes(30));
+        Task task2 = new Task("Task 2", "desc", Status.NEW,
+                LocalDateTime.now().plusHours(1), Duration.ofMinutes(30));
+
         manager.createTask(task1);
         manager.createTask(task2);
 
