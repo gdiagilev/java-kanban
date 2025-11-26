@@ -13,6 +13,7 @@ import java.time.Duration;
 import java.time.LocalDateTime;
 
 public class BaseTestServer {
+
     protected TaskManager manager;
     protected HttpTaskServer server;
     protected Gson gson;
@@ -21,15 +22,16 @@ public class BaseTestServer {
     void startServer() throws IOException {
         manager = new InMemoryTaskManager();
 
+        // ⚡ Регистрируем адаптеры для LocalDateTime и Duration
         gson = new GsonBuilder()
                 .registerTypeAdapter(LocalDateTime.class, new LocalDateTimeAdapter())
                 .registerTypeAdapter(Duration.class, new DurationAdapter())
+                .setPrettyPrinting()
                 .create();
 
         server = new HttpTaskServer(manager, gson);
         server.start();
     }
-
 
     @AfterEach
     void stopServer() {
