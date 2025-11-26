@@ -11,7 +11,8 @@ public class LocalDateTimeAdapter extends TypeAdapter<LocalDateTime> {
 
     @Override
     public void write(JsonWriter out, LocalDateTime value) throws IOException {
-        out.value(value.toString());  // ISO-8601
+        if (value == null) out.nullValue();
+        else out.value(value.toString());
     }
 
     @Override

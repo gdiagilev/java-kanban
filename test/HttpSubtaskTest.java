@@ -17,7 +17,7 @@ import java.time.LocalDateTime;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class HistoryHttpTest {
+public class HttpSubtaskTest {
 
     private TaskManager manager;
     private Gson gson;
@@ -34,25 +34,26 @@ public class HistoryHttpTest {
     }
 
     @Test
-    void testHistory() throws Exception {
-        // Создаем задачу
-        Task task = new Task("Task1", "Desc1", Status.NEW, LocalDateTime.now(), Duration.ofMinutes(10));
-        manager.createTask(task);
+    void testCreateAndGetSubtask() throws Exception {
+        Epic epic = new Epic("Epic1", "EpicDesc", Status.NEW, LocalDateTime.now(), Duration.ofMinutes(1));
+        manager.createEpicTask(epic);
 
-        // Доступ к задаче (чтобы она попала в историю)
-        manager.getTask(task.getId());
+        Subtask subtask = new Subtask(
+                "Sub1", "SubDesc", Status.NEW, epic.getId(),
+                LocalDateTime.now(), Duration.ofMinutes(10)
+        );
+        manager.createSubtask(subtask);
 
-        // HTTP-запрос на получение истории
         HttpRequest request = HttpRequest.newBuilder()
-                .uri(URI.create("http://localhost:8080/history"))
+                .uri(URI.create("http://localhost:8080/epics/subtasks?id=" + epic.getId()))
                 .GET()
                 .build();
 
         HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+        Subtask[] returned = gson.fromJson(response.body(), Subtask[].class);
 
-        Task[] history = gson.fromJson(response.body(), Task[].class);
-
-        assertEquals(1, history.length);
-        assertEquals("Task1", history[0].getName());
+        assertEquals(1, returned.length);
+        assertEquals("Sub1", returned[0].getName());
+        assertEquals(epic.getId(), returned[0].getEpicId());
     }
 }
