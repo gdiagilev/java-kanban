@@ -17,16 +17,29 @@ public class PrioritizedHttpTest extends BaseTestServer {
 
     @Test
     void testPrioritizedTasksOrder() throws Exception {
-        Task t1 = new Task("T1", "Desc", Status.NEW, LocalDateTime.now(), Duration.ofMinutes(10));
-        Task t2 = new Task("T2", "Desc", Status.NEW, LocalDateTime.now().plusMinutes(5), Duration.ofMinutes(10));
+        // Начальное время
+        LocalDateTime now = LocalDateTime.now();
+
+        // Создаем задачи с непересекающимися временами
+        Task t1 = new Task("T1", "Desc", Status.NEW, now, Duration.ofMinutes(10));
+        Task t2 = new Task("T2", "Desc", Status.NEW, t1.getEndTime().plusMinutes(1), Duration.ofMinutes(10));
+
+        // Добавляем задачи в менеджер
         manager.createTask(t1);
         manager.createTask(t2);
 
-        HttpRequest get = HttpRequest.newBuilder(URI.create("http://localhost:8080/tasks/prioritized"))
-                .GET().build();
+        // HTTP-запрос на получение приоритетных задач
+        HttpRequest get = HttpRequest.newBuilder(URI.create("http://localhost:8080/prioritized"))
+                .GET()
+                .build();
+
         HttpResponse<String> resp = client.send(get, HttpResponse.BodyHandlers.ofString());
+
         Task[] tasks = gson.fromJson(resp.body(), Task[].class);
+
+        // Проверяем количество задач и порядок по времени
         assertEquals(2, tasks.length);
-        assertEquals("T1", tasks[0].getName()); // проверяем порядок
+        assertEquals("T1", tasks[0].getName());
+        assertEquals("T2", tasks[1].getName());
     }
 }
