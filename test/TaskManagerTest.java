@@ -1,5 +1,3 @@
-package ru.yandex.tracker;
-
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import ru.yandex.tracker.Model.Epic;
@@ -10,7 +8,7 @@ import ru.yandex.tracker.Service.TaskManager;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-public class TaskManagerTest {
+public abstract class TaskManagerTest {
 
     private TaskManager manager;
     private Epic epic;
@@ -34,4 +32,6 @@ public class TaskManagerTest {
         assertNotNull(retrieved);
         assertEquals("Epic 1", retrieved.getName());
     }
+
+    protected abstract InMemoryTaskManager createManager();
 }

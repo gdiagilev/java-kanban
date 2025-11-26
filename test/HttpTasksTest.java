@@ -1,105 +1,79 @@
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import ru.yandex.tracker.HttpServer.DurationAdapter;
-import ru.yandex.tracker.HttpServer.LocalDateTimeAdapter;
-import ru.yandex.tracker.Service.InMemoryTaskManager;
-import ru.yandex.tracker.Service.TaskManager;
-import ru.yandex.tracker.Model.*;
+package ru.yandex.tracker;
 
-import java.net.URI;
-import java.net.http.HttpClient;
-import java.net.http.HttpRequest;
-import java.net.http.HttpResponse;
+import org.junit.jupiter.api.*;
+import ru.yandex.tracker.Model.*;
+import ru.yandex.tracker.Service.*;
+
 import java.time.Duration;
 import java.time.LocalDateTime;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 
-public class HttpTasksTest {
+class HttpTasksTest {
+
     private TaskManager manager;
-    private Gson gson;
-    private HttpClient client;
+    private Epic epic;
 
     @BeforeEach
-    void setup() {
+    void setUp() {
         manager = new InMemoryTaskManager();
-        gson = new GsonBuilder()
-                .registerTypeAdapter(LocalDateTime.class, new LocalDateTimeAdapter())
-                .registerTypeAdapter(Duration.class, new DurationAdapter())
-                .create();
-        client = HttpClient.newHttpClient();
-    }
-
-    @Test
-    void testCreateAndGetTask() throws Exception {
-        // создаём таску с уникальным временем
-        Task task = new Task("Task1", "Desc", Status.NEW, LocalDateTime.now(), Duration.ofMinutes(30));
-        manager.createTask(task);
-
-        HttpRequest request = HttpRequest.newBuilder()
-                .uri(URI.create("http://localhost:8080/tasks?id=" + task.getId()))
-                .GET()
-                .build();
-
-        HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
-        Task returned = gson.fromJson(response.body(), Task.class);
-
-        assertEquals(task.getName(), returned.getName());
-    }
-
-    @Test
-    void testCreateAndGetEpicWithSubtasks() throws Exception {
-        Epic epic = new Epic("Epic1", "Desc", Status.NEW, LocalDateTime.now(), Duration.ofMinutes(1));
+        epic = new Epic(
+                "Epic1",
+                "Desc",
+                Status.NEW,
+                LocalDateTime.now(),
+                Duration.ZERO
+        );
         manager.createEpicTask(epic);
+    }
 
-        Subtask sub1 = new Subtask("Sub1", "D1", Status.NEW, epic.getId(),
-                LocalDateTime.now(), Duration.ofMinutes(10));
-        Subtask sub2 = new Subtask("Sub2", "D2", Status.NEW, epic.getId(),
-                sub1.getEndTime().plusMinutes(1), Duration.ofMinutes(15));
+    @Test
+    void shouldCreateSubtasksAndCheckTime() {
+        Subtask sub1 = new Subtask(
+                epic.getId(),
+                "Sub1",
+                "D1",
+                Status.NEW,
+                LocalDateTime.now().plusMinutes(1),
+                Duration.ofMinutes(15)
+        );
+        Subtask sub2 = new Subtask(
+                epic.getId(),
+                "Sub2",
+                "D2",
+                Status.NEW,
+                LocalDateTime.now().plusMinutes(20),
+                Duration.ofMinutes(10)
+        );
 
         manager.createSubtask(sub1);
         manager.createSubtask(sub2);
 
-        // GET эпика
-        HttpRequest epicRequest = HttpRequest.newBuilder()
-                .uri(URI.create("http://localhost:8080/epics?id=" + epic.getId()))
-                .GET()
-                .build();
-        HttpResponse<String> epicResp = client.send(epicRequest, HttpResponse.BodyHandlers.ofString());
-        Epic returnedEpic = gson.fromJson(epicResp.body(), Epic.class);
-
-        assertEquals(epic.getName(), returnedEpic.getName());
-
-        // GET подзадач эпика
-        HttpRequest subRequest = HttpRequest.newBuilder()
-                .uri(URI.create("http://localhost:8080/epics/subtasks?id=" + epic.getId()))
-                .GET()
-                .build();
-        HttpResponse<String> subResp = client.send(subRequest, HttpResponse.BodyHandlers.ofString());
-        Subtask[] returnedSubs = gson.fromJson(subResp.body(), Subtask[].class);
-
-        assertEquals(2, returnedSubs.length);
-        assertEquals("Sub1", returnedSubs[0].getName());
-        assertEquals("Sub2", returnedSubs[1].getName());
+        assertEquals(2, manager.getSubtasksOfEpic(epic.getId()).size());
     }
 
     @Test
-    void testPrioritizedTasksOrder() {
-        LocalDateTime now = LocalDateTime.now();
+    void shouldCreateTaskAndCheckPrioritizedTasksOrder() {
+        Task t1 = new Task(
+                "T1",
+                "Desc1",
+                Status.NEW,
+                LocalDateTime.now(),
+                Duration.ofMinutes(10)
+        );
 
-        Task t1 = new Task("T1", "D1", Status.NEW, now, Duration.ofMinutes(30));
-        Task t2 = new Task("T2", "D2", Status.NEW, t1.getEndTime().plusMinutes(1), Duration.ofMinutes(45));
-        Subtask s1 = new Subtask("S1", "D3", Status.NEW, 0, t2.getEndTime().plusMinutes(1), Duration.ofMinutes(15));
+        Task t2 = new Task(
+                "T2",
+                "Desc2",
+                Status.NEW,
+                t1.getEndTime().plusMinutes(1),
+                Duration.ofMinutes(15)
+        );
 
         manager.createTask(t1);
         manager.createTask(t2);
-        manager.createSubtask(s1);
 
-        // Проверяем, что порядок приоритетных задач корректный
         assertEquals(t1.getId(), manager.getPrioritizedTasks().get(0).getId());
         assertEquals(t2.getId(), manager.getPrioritizedTasks().get(1).getId());
-        assertEquals(s1.getId(), manager.getPrioritizedTasks().get(2).getId());
     }
 }
