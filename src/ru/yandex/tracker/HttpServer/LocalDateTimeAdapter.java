@@ -8,14 +8,14 @@ import java.io.IOException;
 import java.time.LocalDateTime;
 
 public class LocalDateTimeAdapter extends TypeAdapter<LocalDateTime> {
+
     @Override
     public void write(JsonWriter out, LocalDateTime value) throws IOException {
-        out.value(value != null ? value.toString() : null);
+        out.value(value.toString());  // ISO-8601
     }
 
     @Override
     public LocalDateTime read(JsonReader in) throws IOException {
-        String s = in.nextString();
-        return (s == null || s.isEmpty()) ? null : LocalDateTime.parse(s);
+        return LocalDateTime.parse(in.nextString());
     }
 }

@@ -8,14 +8,14 @@ import java.io.IOException;
 import java.time.Duration;
 
 public class DurationAdapter extends TypeAdapter<Duration> {
+
     @Override
     public void write(JsonWriter out, Duration value) throws IOException {
-        out.value(value != null ? value.toMinutes() : null);
+        out.value(value.toMinutes());  // тесты ждут минуты
     }
 
     @Override
     public Duration read(JsonReader in) throws IOException {
-        long minutes = in.nextLong();
-        return Duration.ofMinutes(minutes);
+        return Duration.ofMinutes(in.nextLong());
     }
 }
