@@ -22,31 +22,59 @@ public class Task {
         this.endTime = calculateEndTime();
     }
 
-    public int getId() { return id; }
-    public void setId(int id) { this.id = id; }
+    public int getId() {
+        return id;
+    }
 
-    public String getName() { return name; }
-    public void setName(String name) { this.name = name; }
+    public void setId(int id) {
+        this.id = id;
+    }
 
-    public String getDescription() { return description; }
-    public void setDescription(String description) { this.description = description; }
+    public String getName() {
+        return name;
+    }
 
-    public Status getStatus() { return status; }
-    public void setStatus(Status status) { this.status = status; }
+    public void setName(String name) {
+        this.name = name;
+    }
 
-    public LocalDateTime getStartTime() { return startTime; }
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public Status getStatus() {
+        return status;
+    }
+
+    public void setStatus(Status status) {
+        this.status = status;
+    }
+
+    public LocalDateTime getStartTime() {
+        return startTime;
+    }
+
     public void setStartTime(LocalDateTime startTime) {
         this.startTime = startTime;
         this.endTime = calculateEndTime();
     }
 
-    public Duration getDuration() { return duration; }
+    public Duration getDuration() {
+        return duration;
+    }
+
     public void setDuration(Duration duration) {
         this.duration = duration;
         this.endTime = calculateEndTime();
     }
 
-    public LocalDateTime getEndTime() { return endTime; }
+    public LocalDateTime getEndTime() {
+        return endTime;
+    }
 
     private LocalDateTime calculateEndTime() {
         return startTime != null && duration != null ? startTime.plus(duration) : null;
@@ -61,5 +89,7 @@ public class Task {
     }
 
     @Override
-    public int hashCode() { return Objects.hash(id); }
+    public int hashCode() {
+        return Objects.hash(id);
+    }
 }
