@@ -6,11 +6,15 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Epic extends Task {
-
     private final List<Subtask> subtasks = new ArrayList<>();
+    private LocalDateTime endTime;  // <-- добавляем поле
 
     public Epic(String name, String description, Status status, LocalDateTime startTime, Duration duration) {
         super(name, description, status, startTime, duration);
+    }
+
+    public List<Subtask> getSubtasks() {
+        return subtasks;
     }
 
     public void addSubtask(Subtask subtask) {
@@ -21,11 +25,12 @@ public class Epic extends Task {
         subtasks.remove(subtask);
     }
 
-    public List<Subtask> getSubtasks() {
-        return new ArrayList<>(subtasks);
+    // --- Методы для работы с endTime ---
+    public LocalDateTime getEndTime() {
+        return endTime;
     }
 
-    public void clearSubtasks() {
-        subtasks.clear();
+    public void setEndTime(LocalDateTime endTime) {
+        this.endTime = endTime;
     }
 }
