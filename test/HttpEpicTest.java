@@ -1,61 +1,66 @@
 package ru.yandex.tracker;
 
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import ru.yandex.tracker.Model.Epic;
-import ru.yandex.tracker.Model.Status;
-import ru.yandex.tracker.Model.Subtask;
+import org.junit.jupiter.api.*;
+import ru.yandex.tracker.Model.*;
 import ru.yandex.tracker.Service.InMemoryTaskManager;
 import ru.yandex.tracker.Service.TaskManager;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import java.time.Duration;
+import java.time.LocalDateTime;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 public class HttpEpicTest {
 
     private TaskManager manager;
 
     @BeforeEach
-    void setUp() {
+    void setup() {
         manager = new InMemoryTaskManager();
     }
 
     @Test
-    void testCreateEpicWithSubtasks() {
+    void shouldCreateEpicCorrectly() {
         Epic epic = new Epic(
                 "Epic1",
                 "Desc",
                 Status.NEW,
-                null,
-                null
+                LocalDateTime.now(),
+                Duration.ofMinutes(0)
         );
+
         manager.createEpicTask(epic);
 
-        Subtask s1 = new Subtask(
+        Epic saved = manager.getEpicTask(epic.getId());
+        assertNotNull(saved);
+        assertEquals("Epic1", saved.getName());
+        assertEquals(Status.NEW, saved.getStatus());
+    }
+
+    @Test
+    void shouldCreateSubtaskForEpic() {
+        Epic epic = new Epic(
+                "Epic2",
+                "Desc2",
+                Status.NEW,
+                LocalDateTime.now(),
+                Duration.ofMinutes(0)
+        );
+
+        manager.createEpicTask(epic);
+
+        Subtask sub = new Subtask(
                 epic.getId(),
-                "S1",
+                "Sub1",
                 "D1",
                 Status.NEW,
-                null,
-                null
+                LocalDateTime.now().plusMinutes(10),
+                Duration.ofMinutes(20)
         );
 
-        Subtask s2 = new Subtask(
-                epic.getId(),
-                "S2",
-                "D2",
-                Status.NEW,
-                null,
-                null
-        );
+        manager.createSubtask(sub);
 
-        manager.createSubtask(s1);
-        manager.createSubtask(s2);
-
-        assertEquals(2, manager.getSubtasksOfEpic(epic.getId()).size());
-        assertTrue(manager.getSubtasksOfEpic(epic.getId()).stream()
-                .anyMatch(sub -> sub.getName().equals("S1")));
-        assertTrue(manager.getSubtasksOfEpic(epic.getId()).stream()
-                .anyMatch(sub -> sub.getName().equals("S2")));
+        assertEquals(1, manager.getSubtasksOfEpic(epic.getId()).size());
+        assertEquals("Sub1", manager.getSubtask(sub.getId()).getName());
     }
 }
