@@ -19,7 +19,7 @@ import java.time.LocalDateTime;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class HistoryHttpTest {
+public class HttpTaskServerHistoryTest {
 
     private TaskManager manager;
     private Gson gson;
@@ -35,7 +35,6 @@ public class HistoryHttpTest {
                 .create();
         client = HttpClient.newHttpClient();
 
-        // Запуск сервера
         server = new HttpTaskServer(manager, gson);
         server.start();
     }

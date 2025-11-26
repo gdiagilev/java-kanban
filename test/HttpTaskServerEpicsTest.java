@@ -1,5 +1,3 @@
-package ru.yandex.tracker;
-
 import org.junit.jupiter.api.*;
 import ru.yandex.tracker.Model.*;
 import ru.yandex.tracker.Service.*;
@@ -9,7 +7,7 @@ import java.time.LocalDateTime;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class HttpEpicTest {
+class HttpTaskServerEpicsTest {
 
     private TaskManager manager;
 

@@ -1,5 +1,3 @@
-package ru.yandex.tracker;
-
 import org.junit.jupiter.api.*;
 import ru.yandex.tracker.Model.*;
 import ru.yandex.tracker.Service.*;

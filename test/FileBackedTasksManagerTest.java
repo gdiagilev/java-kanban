@@ -1,5 +1,3 @@
-package ru.yandex.tracker;
-
 import org.junit.jupiter.api.*;
 import ru.yandex.tracker.Model.*;
 import ru.yandex.tracker.Service.*;
@@ -39,7 +37,6 @@ class FileBackedTasksManagerTest {
 
         manager.createTask(t);
 
-        // Создаём новый менеджер и загружаем из файла
         FileBackedTasksManager loadedManager = new FileBackedTasksManager(tempFile);
         Task loadedTask = loadedManager.getTask(t.getId());
 

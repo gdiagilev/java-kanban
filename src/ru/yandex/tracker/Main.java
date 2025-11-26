@@ -11,7 +11,7 @@ public class Main {
     public static void main(String[] args) {
         TaskManager manager = new InMemoryTaskManager();
 
-        // Создание эпиков с полной сигнатурой
+        // Создание эпиков
         Epic epic1 = new Epic(
                 "Эпик 1",
                 "Описание эпика 1",
@@ -31,7 +31,7 @@ public class Main {
         manager.createEpicTask(epic1);
         manager.createEpicTask(epic2);
 
-        // Создание подзадач с полной сигнатурой
+        // Создание подзадач
         Subtask sub1 = new Subtask(
                 epic1.getId(),
                 "Подзадача 1",

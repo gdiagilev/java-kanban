@@ -27,7 +27,6 @@ public class HttpTaskServer {
 
     private void createContexts() {
 
-        // ---------- TASKS ----------
         server.createContext("/tasks", exchange -> {
             try {
                 String method = exchange.getRequestMethod();
@@ -55,7 +54,6 @@ public class HttpTaskServer {
                     }
                 }
 
-                // /tasks/{id}
                 if (path.startsWith("/tasks/")) {
                     int id = Integer.parseInt(path.substring("/tasks/".length()));
 
@@ -88,7 +86,6 @@ public class HttpTaskServer {
         });
 
 
-        // ---------- SUBTASKS ----------
         server.createContext("/subtasks", exchange -> {
             try {
                 String method = exchange.getRequestMethod();
@@ -148,7 +145,6 @@ public class HttpTaskServer {
         });
 
 
-        // ---------- EPICS ----------
         server.createContext("/epics", exchange -> {
             try {
                 String method = exchange.getRequestMethod();
@@ -206,7 +202,6 @@ public class HttpTaskServer {
         });
 
 
-        // ---------- SUBTASKS OF EPIC ----------
         server.createContext("/epics/subtasks", exchange -> {
             try {
                 String method = exchange.getRequestMethod();
@@ -226,7 +221,6 @@ public class HttpTaskServer {
         });
 
 
-        // ---------- HISTORY ----------
         server.createContext("/history", exchange -> {
             try {
                 List<Task> history = manager.getHistory();
@@ -237,7 +231,6 @@ public class HttpTaskServer {
         });
 
 
-        // ---------- PRIORITIZED ----------
         server.createContext("/prioritized", exchange -> {
             try {
                 sendJson(exchange, manager.getPrioritizedTasks(), 200);
@@ -247,8 +240,6 @@ public class HttpTaskServer {
         });
     }
 
-
-    // ====================== UTILS =======================
 
     private String readBody(HttpExchange exchange) throws IOException {
         InputStream is = exchange.getRequestBody();

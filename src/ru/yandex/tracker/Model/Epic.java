@@ -7,7 +7,7 @@ import java.util.List;
 
 public class Epic extends Task {
     private final List<Subtask> subtasks = new ArrayList<>();
-    private LocalDateTime endTime;  // <-- добавляем поле
+    private LocalDateTime endTime;
 
     public Epic(String name, String description, Status status, LocalDateTime startTime, Duration duration) {
         super(name, description, status, startTime, duration);
@@ -25,7 +25,6 @@ public class Epic extends Task {
         subtasks.remove(subtask);
     }
 
-    // --- Методы для работы с endTime ---
     public LocalDateTime getEndTime() {
         return endTime;
     }
