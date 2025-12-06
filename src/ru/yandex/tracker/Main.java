@@ -1,49 +1,77 @@
 package ru.yandex.tracker;
 
 import ru.yandex.tracker.Model.*;
-import ru.yandex.tracker.Service.*;
+import ru.yandex.tracker.Service.InMemoryTaskManager;
+import ru.yandex.tracker.Service.TaskManager;
+
+import java.time.Duration;
+import java.time.LocalDateTime;
 
 public class Main {
     public static void main(String[] args) {
-        System.out.println("Поехали!");
+        TaskManager manager = new InMemoryTaskManager();
 
-        InMemoryTaskManager manager = new InMemoryTaskManager();
+        // Создание эпиков
+        Epic epic1 = new Epic(
+                "Эпик 1",
+                "Описание эпика 1",
+                Status.NEW,
+                LocalDateTime.now(),
+                Duration.ofHours(5)
+        );
 
-        Task task1 = new Task("Задача 1", "Описание задачи 1", Status.NEW);
-        Task task2 = new Task("Задача 2", "Описание задачи 2", Status.NEW);
-        Epic epic1 = new Epic("Эпик 1", "Описание эпика 1");
-        Epic epic2 = new Epic("Эпик 2", "Описание эпика 2");
-        Subtask subtask1 = new Subtask(3, "Подзадача 1", "Подзадача 1 эпика 1", Status.NEW);
-        Subtask subtask2 = new Subtask(3, "Подзадача 2", "Подзадача 2 эпика 1", Status.NEW);
-        Subtask subtask3 = new Subtask(4, "Подзадача 1", "Подзадача 1 эпика 2", Status.NEW);
+        Epic epic2 = new Epic(
+                "Эпик 2",
+                "Описание эпика 2",
+                Status.NEW,
+                LocalDateTime.now().plusDays(1),
+                Duration.ofHours(3)
+        );
 
-        manager.createTask(task1);
-        manager.createTask(task2);
         manager.createEpicTask(epic1);
-        manager.createSubtask(subtask1);
-        manager.createSubtask(subtask2);
         manager.createEpicTask(epic2);
-        manager.createSubtask(subtask3);
 
-        System.out.println("Созданные задачи:");
-        System.out.println(manager.getAllTasks());
-        System.out.println("Созданные эпики:");
-        System.out.println(manager.getAllEpicTasks());
-        System.out.println("Созданные подзадачи:");
-        System.out.println(manager.getAllSubtasks());
+        // Создание подзадач
+        Subtask sub1 = new Subtask(
+                epic1.getId(),
+                "Подзадача 1",
+                "Подзадача 1 эпика 1",
+                Status.NEW,
+                LocalDateTime.now(),
+                Duration.ofHours(2)
+        );
 
-        // ✅ Имитация просмотра задач пользователем
-        System.out.println("\nПросматриваем задачи...");
-        manager.getTask(task1.getId());
-        manager.getEpicTask(epic1.getId());
-        manager.getSubtask(subtask1.getId());
-        manager.getEpicTask(epic2.getId());
-        manager.getSubtask(subtask3.getId());
+        Subtask sub2 = new Subtask(
+                epic1.getId(),
+                "Подзадача 2",
+                "Подзадача 2 эпика 1",
+                Status.NEW,
+                LocalDateTime.now().plusHours(2),
+                Duration.ofHours(1)
+        );
 
-        // ✅ Теперь можно вывести историю просмотров
-        System.out.println("\nИстория просмотров задач:");
-        System.out.println(manager.getHistory());
+        Subtask sub3 = new Subtask(
+                epic2.getId(),
+                "Подзадача 1",
+                "Подзадача 1 эпика 2",
+                Status.NEW,
+                LocalDateTime.now().plusDays(1),
+                Duration.ofHours(1)
+        );
 
-        // ... (остальной код без изменений)
+        manager.createSubtask(sub1);
+        manager.createSubtask(sub2);
+        manager.createSubtask(sub3);
+
+        // Проверка
+        System.out.println("Все эпики:");
+        for (Epic e : manager.getAllEpicTasks()) {
+            System.out.println(e.getName() + " | Статус: " + e.getStatus());
+        }
+
+        System.out.println("\nВсе подзадачи эпика 1:");
+        for (Subtask s : manager.getSubtasksOfEpic(epic1.getId())) {
+            System.out.println(s.getName() + " | Статус: " + s.getStatus());
+        }
     }
 }

@@ -1,55 +1,50 @@
 package ru.yandex.tracker.Service;
 
-import ru.yandex.tracker.Model.Epic;
-import ru.yandex.tracker.Model.Subtask;
-import ru.yandex.tracker.Model.Task;
+import ru.yandex.tracker.Model.*;
 
 import java.util.List;
 
-public interface TaskManager {
-    Task getTask(int id);
+public abstract class TaskManager {
 
-    Epic getEpicTask(int id);
+    public abstract Task createTask(Task task);
 
-    Subtask getSubtask(int id);
+    public abstract Task updateTask(Task task);
 
-    void createTask(Task task);
+    public abstract Task getTask(int id);
 
-    void createEpicTask(Epic epicTask);
+    public abstract List<Task> getAllTasks();
 
-    void createSubtask(Subtask subtask);
+    public abstract void deleteTask(int id);
 
-    List<Subtask> getAllSubTasksByEpicId(int epicId);
+    public abstract void deleteAllTasks();
 
-    void deleteTask(Task task);
+    public abstract Epic createEpicTask(Epic epic);
 
-    void deleteEpicTask(Epic epicTask);
+    public abstract Epic updateEpicTask(Epic epic);
 
-    void deleteSubtask(Subtask subTask);
+    public abstract Epic getEpicTask(int id);
 
-    void deleteTask(int id);
+    public abstract List<Epic> getAllEpicTasks();
 
-    void deleteEpicTask(int id);
+    public abstract void deleteEpicTask(int id);
 
-    void deleteSubtask(int id);
+    public abstract void deleteAllEpicTasks();
 
-    void deleteAllTasks();
+    public abstract Subtask createSubtask(Subtask subtask);
 
-    void deleteAllEpicTasks();
+    public abstract Subtask updateSubtask(Subtask subtask);
 
-    void deleteAllSubtasks();
+    public abstract Subtask getSubtask(int id);
 
-    void updateTask(Task task);
+    public abstract List<Subtask> getAllSubtasks();
 
-    void updateEpicTask(Epic epicTask);
+    public abstract List<Subtask> getSubtasksOfEpic(int epicId);
 
-    void updateSubtask(Subtask subTask);
+    public abstract void deleteSubtask(int id);
 
-    List<Task> getAllTasks();
+    public abstract void deleteAllSubtasks();
 
-    List<Epic> getAllEpicTasks();
+    public abstract List<Task> getPrioritizedTasks();
 
-    List<Subtask> getAllSubtasks();
-
-    List<Task> getHistory();
+    public abstract List<Task> getHistory();
 }
